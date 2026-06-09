@@ -88,6 +88,14 @@ function OrderPage() {
         </div>
       </div>
 
+      {order.status === "awaiting_payment" && (
+        <div className="mt-6 p-4 rounded-xl border-2 border-warning bg-warning/10 text-center">
+          <Clock className="w-6 h-6 mx-auto text-warning mb-2" />
+          <p className="font-semibold">Vá ao caixa físico para pagar</p>
+          <p className="text-sm text-muted-foreground">Após o pagamento, o stand {order.standName} iniciará o preparo automaticamente.</p>
+        </div>
+      )}
+
       {order.status === "ready" && (
         <div className="mt-6 p-4 rounded-xl border-2 border-success bg-success/10 text-center">
           <Bell className="w-6 h-6 mx-auto text-success mb-2" />
