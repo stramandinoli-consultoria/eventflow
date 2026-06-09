@@ -11,6 +11,7 @@ import { Toaster } from "sonner";
 
 import appCss from "../styles.css?url";
 import { Nav } from "@/components/Nav";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 function NotFoundComponent() {
   return (
@@ -77,10 +78,12 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="min-h-screen flex flex-col">
-        <Nav />
-        <main className="flex-1"><Outlet /></main>
-      </div>
+      <ErrorBoundary>
+        <div className="min-h-screen flex flex-col">
+          <Nav />
+          <main className="flex-1"><Outlet /></main>
+        </div>
+      </ErrorBoundary>
       <Toaster theme="dark" position="top-right" richColors />
     </QueryClientProvider>
   );
