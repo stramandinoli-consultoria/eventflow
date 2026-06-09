@@ -1,5 +1,5 @@
 import { createFileRoute, Link, notFound, useNavigate } from "@tanstack/react-router";
-import { useStore } from "@/lib/store";
+import { useStore, useCurrentUser } from "@/lib/store";
 import { useShallow } from "zustand/react/shallow";
 import { useState } from "react";
 import { Star, Plus, Minus, ShoppingBag, Clock, ChevronLeft } from "lucide-react";

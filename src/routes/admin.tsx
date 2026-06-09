@@ -138,15 +138,25 @@ function Admin() {
 
         <aside className="space-y-6">
           <div className="rounded-2xl border border-border gradient-card p-5">
-            <h3 className="font-semibold mb-4">Eventos</h3>
+            <h3 className="font-semibold mb-4">Gestão</h3>
+            <div className="space-y-2">
+              <Link to="/admin/events" className="flex items-center justify-between p-3 rounded-lg bg-secondary hover:bg-muted transition group">
+                <span className="text-sm font-medium">Eventos & mapas</span>
+                <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition" />
+              </Link>
+              <Link to="/admin/partners" className="flex items-center justify-between p-3 rounded-lg bg-secondary hover:bg-muted transition group">
+                <span className="text-sm font-medium">Empresas parceiras</span>
+                <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition" />
+              </Link>
+            </div>
+          </div>
+
+          <div className="rounded-2xl border border-border gradient-card p-5">
+            <h3 className="font-semibold mb-4">Mapas dos eventos</h3>
             <div className="space-y-2">
               {events.map((e) => (
-                <Link
-                  key={e.id}
-                  to="/admin/events/$eventId/map"
-                  params={{ eventId: e.id }}
-                  className="flex items-center justify-between p-3 rounded-lg bg-secondary hover:bg-muted transition group"
-                >
+                <Link key={e.id} to="/admin/events/$eventId/map" params={{ eventId: e.id }}
+                  className="flex items-center justify-between p-3 rounded-lg bg-secondary hover:bg-muted transition group">
                   <div className="flex items-center gap-3 min-w-0">
                     <MapPinned className="w-4 h-4 text-primary shrink-0" />
                     <div className="min-w-0">
@@ -159,6 +169,7 @@ function Admin() {
               ))}
             </div>
           </div>
+
 
           <div className="rounded-2xl border border-border gradient-card p-5">
             <h3 className="font-semibold mb-4">Ranking de vendas</h3>
