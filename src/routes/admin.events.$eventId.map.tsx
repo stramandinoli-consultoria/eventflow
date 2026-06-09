@@ -16,7 +16,7 @@ export const Route = createFileRoute("/admin/events/$eventId/map")({
 function MapBuilder() {
   const { eventId } = Route.useParams();
   const event = useStore((s) => s.events.find((e) => e.id === eventId));
-  const stands = useStore((s) => s.stands.filter((x) => x.eventId === eventId));
+  const stands = useStore(useShallow((s) => s.stands.filter((x) => x.eventId === eventId)));
   const upsertStand = useStore((s) => s.upsertStand);
   const removeStand = useStore((s) => s.removeStand);
   const [selectedId, setSelectedId] = useState<string | undefined>();

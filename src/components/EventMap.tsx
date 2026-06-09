@@ -1,5 +1,6 @@
 import { useNavigate } from "@tanstack/react-router";
 import { useStore, standTypeColor, type Stand } from "@/lib/store";
+import { useShallow } from "zustand/react/shallow";
 import { Beer, UtensilsCrossed, IceCream, Wine, Music, DoorOpen, Crown, Bath, Wallet } from "lucide-react";
 import { useRef, useState } from "react";
 
@@ -16,7 +17,7 @@ interface Props {
 }
 
 export function EventMap({ eventId, editable, onSelect, selectedId }: Props) {
-  const stands = useStore((s) => s.stands.filter((x) => x.eventId === eventId));
+  const stands = useStore(useShallow((s) => s.stands.filter((x) => x.eventId === eventId)));
   const moveStand = useStore((s) => s.moveStand);
   const navigate = useNavigate();
   const ref = useRef<HTMLDivElement>(null);

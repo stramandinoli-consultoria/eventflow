@@ -15,7 +15,7 @@ function StandPage() {
   const { eventId, standId } = Route.useParams();
   const navigate = useNavigate();
   const stand = useStore((s) => s.stands.find((x) => x.id === standId));
-  const products = useStore((s) => s.products.filter((p) => p.standId === standId));
+  const products = useStore(useShallow((s) => s.products.filter((p) => p.standId === standId)));
   const addOrder = useStore((s) => s.addOrder);
   const [cart, setCart] = useState<Record<string, number>>({});
   const [name, setName] = useState("");
