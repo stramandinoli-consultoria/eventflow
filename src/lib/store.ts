@@ -2,6 +2,32 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
 export type StandType = "food" | "drink" | "beer" | "dessert" | "vip" | "stage" | "restroom" | "entrance" | "cashier";
+export type UserRole = "customer" | "partner" | "admin";
+
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  password: string;
+  phone?: string;
+  role: UserRole;
+  partnerId?: string; // when role=partner, links to Partner
+}
+
+export interface Partner {
+  id: string;
+  companyName: string;
+  cnpj: string;
+  contactName: string;
+  email: string;
+  phone: string;
+  address: string;
+  category: StandType;
+  description: string;
+  logo: string;
+  eventId: string;   // which event they belong to
+  standId: string;   // their stand on the map
+}
 
 export interface Product {
   id: string;
@@ -38,7 +64,7 @@ export interface EventItem {
   status: "upcoming" | "live" | "ended";
 }
 
-export type OrderStatus = "received" | "preparing" | "ready" | "completed" | "cancelled";
+export type OrderStatus = "awaiting_payment" | "preparing" | "ready" | "completed" | "cancelled";
 
 export interface OrderItem {
   productId: string;
@@ -58,6 +84,7 @@ export interface Order {
   eventId: string;
   standId: string;
   standName: string;
+  customerId?: string;
   customerName: string;
   customerPhone: string;
   items: OrderItem[];
@@ -72,9 +99,33 @@ interface State {
   stands: Stand[];
   products: Product[];
   orders: Order[];
+  users: User[];
+  partners: Partner[];
+  currentUserId: string | null;
+
+  // auth
+  login: (email: string, password: string) => User | null;
+  register: (u: Omit<User, "id">) => User;
+  logout: () => void;
+
+  // events
+  upsertEvent: (e: EventItem) => void;
+  removeEvent: (id: string) => void;
+
+  // partners
+  upsertPartner: (p: Partner) => void;
+  removePartner: (id: string) => void;
+
+  // products
+  upsertProduct: (p: Product) => void;
+  removeProduct: (id: string) => void;
+
+  // stands
   upsertStand: (s: Stand) => void;
   moveStand: (id: string, x: number, y: number) => void;
   removeStand: (id: string) => void;
+
+  // orders
   addOrder: (o: Omit<Order, "id" | "createdAt" | "timeline" | "status">) => Order;
   advanceOrder: (id: string) => void;
   cancelOrder: (id: string) => void;
@@ -83,33 +134,9 @@ interface State {
 const now = () => new Date().toISOString();
 
 const seedEvents: EventItem[] = [
-  {
-    id: "ev1",
-    name: "Festival Sabores da Cidade",
-    banner: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=1600&q=80",
-    date: "2026-06-14 17:00",
-    location: "Parque Ibirapuera, São Paulo",
-    description: "Três dias de comida de rua, cervejas artesanais e shows ao vivo.",
-    status: "live",
-  },
-  {
-    id: "ev2",
-    name: "Brew & BBQ Fest",
-    banner: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=1600&q=80",
-    date: "2026-07-22 16:00",
-    location: "Centro de Eventos, Curitiba",
-    description: "O maior encontro de cervejarias independentes e churrasco autoral.",
-    status: "upcoming",
-  },
-  {
-    id: "ev3",
-    name: "GastroNight Rooftop",
-    banner: "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=1600&q=80",
-    date: "2026-08-03 19:00",
-    location: "Edifício Copan, São Paulo",
-    description: "Drinks autorais e cozinha internacional sob as estrelas.",
-    status: "upcoming",
-  },
+  { id: "ev1", name: "Festival Sabores da Cidade", banner: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=1600&q=80", date: "2026-06-14 17:00", location: "Parque Ibirapuera, São Paulo", description: "Três dias de comida de rua, cervejas artesanais e shows ao vivo.", status: "live" },
+  { id: "ev2", name: "Brew & BBQ Fest", banner: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=1600&q=80", date: "2026-07-22 16:00", location: "Centro de Eventos, Curitiba", description: "O maior encontro de cervejarias independentes e churrasco autoral.", status: "upcoming" },
+  { id: "ev3", name: "GastroNight Rooftop", banner: "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=1600&q=80", date: "2026-08-03 19:00", location: "Edifício Copan, São Paulo", description: "Drinks autorais e cozinha internacional sob as estrelas.", status: "upcoming" },
 ];
 
 const seedStands: Stand[] = [
@@ -120,6 +147,7 @@ const seedStands: Stand[] = [
   { id: "s5", eventId: "ev1", name: "Sakura Drinks", category: "drink", description: "Drinks autorais com gin, sake e frutas.", cover: "https://images.unsplash.com/photo-1551024709-8f23befc6f87?w=800&q=80", rating: 4.5, x: 180, y: 290, width: 120, height: 90 },
   { id: "s6", eventId: "ev1", name: "Palco Principal", category: "stage", description: "Shows ao vivo durante todo o evento.", cover: "", rating: 0, x: 380, y: 320, width: 220, height: 100 },
   { id: "s7", eventId: "ev1", name: "Banheiros", category: "restroom", description: "", cover: "", rating: 0, x: 680, y: 290, width: 80, height: 80 },
+  { id: "s8", eventId: "ev1", name: "Caixa Central", category: "cashier", description: "Pague seu pedido aqui.", cover: "", rating: 0, x: 40, y: 410, width: 120, height: 70 },
 ];
 
 const seedProducts: Product[] = [
@@ -133,48 +161,52 @@ const seedProducts: Product[] = [
   { id: "p8", standId: "s5", name: "Gin Tropical", description: "Gin, maracujá, hortelã e gengibre.", price: 32, prepMinutes: 5, image: "https://images.unsplash.com/photo-1551024709-8f23befc6f87?w=600&q=80", available: true },
 ];
 
+const seedUsers: User[] = [
+  { id: "u-admin", name: "Admin Master", email: "admin@eventflow.app", password: "admin123", role: "admin" },
+  { id: "u-cliente", name: "Marina Costa", email: "cliente@demo.com", password: "demo123", role: "customer", phone: "+5511999990001" },
+  { id: "u-parceiro", name: "Burger Republic", email: "burger@demo.com", password: "demo123", role: "partner", partnerId: "pt1" },
+];
+
+const seedPartners: Partner[] = [
+  { id: "pt1", companyName: "Burger Republic LTDA", cnpj: "12.345.678/0001-90", contactName: "Carlos Souza", email: "burger@demo.com", phone: "+5511988880000", address: "Rua das Hambúrguer, 123 — SP", category: "food", description: "Burgers artesanais.", logo: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400&q=80", eventId: "ev1", standId: "s3" },
+];
+
 const seedOrders: Order[] = [
   {
-    id: "ord-1042",
-    eventId: "ev1",
-    standId: "s3",
-    standName: "Burger Republic",
-    customerName: "Marina Costa",
-    customerPhone: "+5511999990001",
+    id: "ord-1042", eventId: "ev1", standId: "s3", standName: "Burger Republic",
+    customerName: "Marina Costa", customerPhone: "+5511999990001",
     items: [{ productId: "p5", productName: "Smash Burger Duplo", qty: 1, unitPrice: 38 }, { productId: "p6", productName: "Fritas Trufadas", qty: 1, unitPrice: 24 }],
-    total: 62,
-    status: "preparing",
-    createdAt: new Date(Date.now() - 1000 * 60 * 7).toISOString(),
+    total: 62, status: "preparing", createdAt: new Date(Date.now() - 1000 * 60 * 7).toISOString(),
     timeline: [
-      { status: "received", at: new Date(Date.now() - 1000 * 60 * 7).toISOString() },
-      { status: "preparing", at: new Date(Date.now() - 1000 * 60 * 4).toISOString() },
+      { status: "awaiting_payment", at: new Date(Date.now() - 1000 * 60 * 7).toISOString() },
+      { status: "preparing", at: new Date(Date.now() - 1000 * 60 * 4).toISOString(), note: "Pagamento confirmado no caixa" },
     ],
   },
   {
-    id: "ord-1043",
-    eventId: "ev1",
-    standId: "s2",
-    standName: "Beer Station",
-    customerName: "Rafael Lima",
-    customerPhone: "+5511999990002",
+    id: "ord-1043", eventId: "ev1", standId: "s2", standName: "Beer Station",
+    customerName: "Rafael Lima", customerPhone: "+5511999990002",
     items: [{ productId: "p3", productName: "Chopp IPA 500ml", qty: 2, unitPrice: 22 }],
-    total: 44,
-    status: "ready",
-    createdAt: new Date(Date.now() - 1000 * 60 * 12).toISOString(),
+    total: 44, status: "ready", createdAt: new Date(Date.now() - 1000 * 60 * 12).toISOString(),
     timeline: [
-      { status: "received", at: new Date(Date.now() - 1000 * 60 * 12).toISOString() },
-      { status: "preparing", at: new Date(Date.now() - 1000 * 60 * 10).toISOString() },
+      { status: "awaiting_payment", at: new Date(Date.now() - 1000 * 60 * 12).toISOString() },
+      { status: "preparing", at: new Date(Date.now() - 1000 * 60 * 10).toISOString(), note: "Pagamento confirmado no caixa" },
       { status: "ready", at: new Date(Date.now() - 1000 * 60 * 2).toISOString(), note: "Notificação WhatsApp enviada" },
     ],
   },
 ];
 
 const nextStatus: Record<OrderStatus, OrderStatus> = {
-  received: "preparing",
+  awaiting_payment: "preparing",
   preparing: "ready",
   ready: "completed",
   completed: "completed",
   cancelled: "cancelled",
+};
+
+const noteFor = (s: OrderStatus): string | undefined => {
+  if (s === "preparing") return "Pagamento confirmado no caixa";
+  if (s === "ready") return "Notificação WhatsApp enviada";
+  return undefined;
 };
 
 export const useStore = create<State>()(
@@ -184,21 +216,57 @@ export const useStore = create<State>()(
       stands: seedStands,
       products: seedProducts,
       orders: seedOrders,
-      upsertStand: (s) =>
-        set((st) => {
-          const exists = st.stands.find((x) => x.id === s.id);
-          return { stands: exists ? st.stands.map((x) => (x.id === s.id ? s : x)) : [...st.stands, s] };
-        }),
-      moveStand: (id, x, y) =>
-        set((st) => ({ stands: st.stands.map((s) => (s.id === id ? { ...s, x, y } : s)) })),
+      users: seedUsers,
+      partners: seedPartners,
+      currentUserId: null,
+
+      login: (email, password) => {
+        const u = get().users.find((x) => x.email.toLowerCase() === email.toLowerCase() && x.password === password);
+        if (u) set({ currentUserId: u.id });
+        return u ?? null;
+      },
+      register: (u) => {
+        const user: User = { ...u, id: "u-" + Date.now() };
+        set((st) => ({ users: [...st.users, user], currentUserId: user.id }));
+        return user;
+      },
+      logout: () => set({ currentUserId: null }),
+
+      upsertEvent: (e) => set((st) => {
+        const exists = st.events.find((x) => x.id === e.id);
+        return { events: exists ? st.events.map((x) => (x.id === e.id ? e : x)) : [...st.events, e] };
+      }),
+      removeEvent: (id) => set((st) => ({
+        events: st.events.filter((e) => e.id !== id),
+        stands: st.stands.filter((s) => s.eventId !== id),
+      })),
+
+      upsertPartner: (p) => set((st) => {
+        const exists = st.partners.find((x) => x.id === p.id);
+        return { partners: exists ? st.partners.map((x) => (x.id === p.id ? p : x)) : [...st.partners, p] };
+      }),
+      removePartner: (id) => set((st) => ({ partners: st.partners.filter((p) => p.id !== id) })),
+
+      upsertProduct: (p) => set((st) => {
+        const exists = st.products.find((x) => x.id === p.id);
+        return { products: exists ? st.products.map((x) => (x.id === p.id ? p : x)) : [...st.products, p] };
+      }),
+      removeProduct: (id) => set((st) => ({ products: st.products.filter((p) => p.id !== id) })),
+
+      upsertStand: (s) => set((st) => {
+        const exists = st.stands.find((x) => x.id === s.id);
+        return { stands: exists ? st.stands.map((x) => (x.id === s.id ? s : x)) : [...st.stands, s] };
+      }),
+      moveStand: (id, x, y) => set((st) => ({ stands: st.stands.map((s) => (s.id === id ? { ...s, x, y } : s)) })),
       removeStand: (id) => set((st) => ({ stands: st.stands.filter((s) => s.id !== id) })),
+
       addOrder: (o) => {
         const order: Order = {
           ...o,
           id: "ord-" + Math.floor(1044 + Math.random() * 9000),
-          status: "received",
+          status: "awaiting_payment",
           createdAt: now(),
-          timeline: [{ status: "received", at: now() }],
+          timeline: [{ status: "awaiting_payment", at: now(), note: "Dirija-se ao caixa para pagar" }],
         };
         set((st) => ({ orders: [order, ...st.orders] }));
         return order;
@@ -209,11 +277,7 @@ export const useStore = create<State>()(
             if (o.id !== id) return o;
             const ns = nextStatus[o.status];
             if (ns === o.status) return o;
-            return {
-              ...o,
-              status: ns,
-              timeline: [...o.timeline, { status: ns, at: now(), note: ns === "ready" ? "Notificação WhatsApp enviada" : undefined }],
-            };
+            return { ...o, status: ns, timeline: [...o.timeline, { status: ns, at: now(), note: noteFor(ns) }] };
           }),
         })),
       cancelOrder: (id) =>
@@ -223,38 +287,30 @@ export const useStore = create<State>()(
           ),
         })),
     }),
-    { name: "eventflow-store", version: 1 }
+    { name: "eventflow-store", version: 3 }
   )
 );
 
 export const statusLabel: Record<OrderStatus, string> = {
-  received: "Pedido Recebido",
-  preparing: "Em Preparo",
-  ready: "Pronto para Retirada",
+  awaiting_payment: "Aguardando pagamento",
+  preparing: "Em preparo",
+  ready: "Pronto para retirada",
   completed: "Finalizado",
   cancelled: "Cancelado",
 };
 
 export const standTypeLabel: Record<StandType, string> = {
-  food: "Comida",
-  drink: "Drinks",
-  beer: "Chopp",
-  dessert: "Sobremesas",
-  vip: "Área VIP",
-  stage: "Palco",
-  restroom: "Banheiros",
-  entrance: "Entrada",
-  cashier: "Caixa",
+  food: "Comida", drink: "Drinks", beer: "Chopp", dessert: "Sobremesas",
+  vip: "Área VIP", stage: "Palco", restroom: "Banheiros", entrance: "Entrada", cashier: "Caixa",
 };
 
 export const standTypeColor: Record<StandType, string> = {
-  food: "oklch(0.74 0.18 50)",
-  drink: "oklch(0.65 0.18 290)",
-  beer: "oklch(0.78 0.17 85)",
-  dessert: "oklch(0.7 0.18 350)",
-  vip: "oklch(0.68 0.2 25)",
-  stage: "oklch(0.55 0.05 280)",
-  restroom: "oklch(0.5 0.02 240)",
-  entrance: "oklch(0.55 0.15 145)",
-  cashier: "oklch(0.5 0.1 200)",
+  food: "oklch(0.74 0.18 50)", drink: "oklch(0.65 0.18 290)", beer: "oklch(0.78 0.17 85)",
+  dessert: "oklch(0.7 0.18 350)", vip: "oklch(0.68 0.2 25)", stage: "oklch(0.55 0.05 280)",
+  restroom: "oklch(0.5 0.02 240)", entrance: "oklch(0.55 0.15 145)", cashier: "oklch(0.5 0.1 200)",
+};
+
+export const useCurrentUser = () => {
+  const id = useStore((s) => s.currentUserId);
+  return useStore((s) => s.users.find((u) => u.id === id) ?? null);
 };

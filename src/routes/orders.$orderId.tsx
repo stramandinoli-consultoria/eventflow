@@ -8,10 +8,10 @@ export const Route = createFileRoute("/orders/$orderId")({
 });
 
 const ICONS: Record<OrderStatus, any> = {
-  received: Clock, preparing: ChefHat, ready: Bell, completed: PartyPopper, cancelled: XCircle,
+  awaiting_payment: Clock, preparing: ChefHat, ready: Bell, completed: PartyPopper, cancelled: XCircle,
 };
 
-const STEPS: OrderStatus[] = ["received", "preparing", "ready", "completed"];
+const STEPS: OrderStatus[] = ["awaiting_payment", "preparing", "ready", "completed"];
 
 function OrderPage() {
   const { orderId } = Route.useParams();
@@ -87,6 +87,14 @@ function OrderPage() {
           <span>Total</span><span className="text-primary">R$ {order.total.toFixed(2)}</span>
         </div>
       </div>
+
+      {order.status === "awaiting_payment" && (
+        <div className="mt-6 p-4 rounded-xl border-2 border-warning bg-warning/10 text-center">
+          <Clock className="w-6 h-6 mx-auto text-warning mb-2" />
+          <p className="font-semibold">Vá ao caixa físico para pagar</p>
+          <p className="text-sm text-muted-foreground">Após o pagamento, o stand {order.standName} iniciará o preparo automaticamente.</p>
+        </div>
+      )}
 
       {order.status === "ready" && (
         <div className="mt-6 p-4 rounded-xl border-2 border-success bg-success/10 text-center">

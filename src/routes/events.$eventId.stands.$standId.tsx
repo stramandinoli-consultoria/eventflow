@@ -1,5 +1,5 @@
 import { createFileRoute, Link, notFound, useNavigate } from "@tanstack/react-router";
-import { useStore } from "@/lib/store";
+import { useStore, useCurrentUser } from "@/lib/store";
 import { useShallow } from "zustand/react/shallow";
 import { useState } from "react";
 import { Star, Plus, Minus, ShoppingBag, Clock, ChevronLeft } from "lucide-react";
@@ -18,9 +18,10 @@ function StandPage() {
   const stand = useStore((s) => s.stands.find((x) => x.id === standId));
   const products = useStore(useShallow((s) => s.products.filter((p) => p.standId === standId)));
   const addOrder = useStore((s) => s.addOrder);
+  const user = useCurrentUser();
   const [cart, setCart] = useState<Record<string, number>>({});
-  const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
+  const [name, setName] = useState(user?.name ?? "");
+  const [phone, setPhone] = useState(user?.phone ?? "");
   if (!stand) throw notFound();
 
   const inc = (id: string) => setCart((c) => ({ ...c, [id]: (c[id] ?? 0) + 1 }));
@@ -37,8 +38,8 @@ function StandPage() {
   const place = () => {
     if (!name || !phone) { toast.error("Informe nome e WhatsApp"); return; }
     if (items.length === 0) { toast.error("Adicione produtos"); return; }
-    const order = addOrder({ eventId, standId, standName: stand.name, customerName: name, customerPhone: phone, items, total });
-    toast.success(`Pedido #${order.id} criado!`);
+    const order = addOrder({ eventId, standId, standName: stand.name, customerName: name, customerPhone: phone, items, total, customerId: user?.id });
+    toast.success(`Pedido #${order.id} criado! Dirija-se ao caixa.`);
     navigate({ to: "/orders/$orderId", params: { orderId: order.id } });
   };
 

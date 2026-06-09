@@ -9,13 +9,33 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as PartnerRouteImport } from './routes/partner'
+import { Route as MeRouteImport } from './routes/me'
+import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as OrdersOrderIdRouteImport } from './routes/orders.$orderId'
 import { Route as EventsEventIdRouteImport } from './routes/events.$eventId'
+import { Route as AdminPartnersRouteImport } from './routes/admin.partners'
+import { Route as AdminEventsRouteImport } from './routes/admin.events'
 import { Route as EventsEventIdStandsStandIdRouteImport } from './routes/events.$eventId.stands.$standId'
 import { Route as AdminEventsEventIdMapRouteImport } from './routes/admin.events.$eventId.map'
 
+const PartnerRoute = PartnerRouteImport.update({
+  id: '/partner',
+  path: '/partner',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MeRoute = MeRouteImport.update({
+  id: '/me',
+  path: '/me',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminRoute = AdminRouteImport.update({
   id: '/admin',
   path: '/admin',
@@ -36,6 +56,16 @@ const EventsEventIdRoute = EventsEventIdRouteImport.update({
   path: '/events/$eventId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminPartnersRoute = AdminPartnersRouteImport.update({
+  id: '/partners',
+  path: '/partners',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminEventsRoute = AdminEventsRouteImport.update({
+  id: '/events',
+  path: '/events',
+  getParentRoute: () => AdminRoute,
+} as any)
 const EventsEventIdStandsStandIdRoute =
   EventsEventIdStandsStandIdRouteImport.update({
     id: '/stands/$standId',
@@ -43,14 +73,19 @@ const EventsEventIdStandsStandIdRoute =
     getParentRoute: () => EventsEventIdRoute,
   } as any)
 const AdminEventsEventIdMapRoute = AdminEventsEventIdMapRouteImport.update({
-  id: '/events/$eventId/map',
-  path: '/events/$eventId/map',
-  getParentRoute: () => AdminRoute,
+  id: '/$eventId/map',
+  path: '/$eventId/map',
+  getParentRoute: () => AdminEventsRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
+  '/auth': typeof AuthRoute
+  '/me': typeof MeRoute
+  '/partner': typeof PartnerRoute
+  '/admin/events': typeof AdminEventsRouteWithChildren
+  '/admin/partners': typeof AdminPartnersRoute
   '/events/$eventId': typeof EventsEventIdRouteWithChildren
   '/orders/$orderId': typeof OrdersOrderIdRoute
   '/admin/events/$eventId/map': typeof AdminEventsEventIdMapRoute
@@ -59,6 +94,11 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
+  '/auth': typeof AuthRoute
+  '/me': typeof MeRoute
+  '/partner': typeof PartnerRoute
+  '/admin/events': typeof AdminEventsRouteWithChildren
+  '/admin/partners': typeof AdminPartnersRoute
   '/events/$eventId': typeof EventsEventIdRouteWithChildren
   '/orders/$orderId': typeof OrdersOrderIdRoute
   '/admin/events/$eventId/map': typeof AdminEventsEventIdMapRoute
@@ -68,6 +108,11 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
+  '/auth': typeof AuthRoute
+  '/me': typeof MeRoute
+  '/partner': typeof PartnerRoute
+  '/admin/events': typeof AdminEventsRouteWithChildren
+  '/admin/partners': typeof AdminPartnersRoute
   '/events/$eventId': typeof EventsEventIdRouteWithChildren
   '/orders/$orderId': typeof OrdersOrderIdRoute
   '/admin/events/$eventId/map': typeof AdminEventsEventIdMapRoute
@@ -78,6 +123,11 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/admin'
+    | '/auth'
+    | '/me'
+    | '/partner'
+    | '/admin/events'
+    | '/admin/partners'
     | '/events/$eventId'
     | '/orders/$orderId'
     | '/admin/events/$eventId/map'
@@ -86,6 +136,11 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/admin'
+    | '/auth'
+    | '/me'
+    | '/partner'
+    | '/admin/events'
+    | '/admin/partners'
     | '/events/$eventId'
     | '/orders/$orderId'
     | '/admin/events/$eventId/map'
@@ -94,6 +149,11 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/admin'
+    | '/auth'
+    | '/me'
+    | '/partner'
+    | '/admin/events'
+    | '/admin/partners'
     | '/events/$eventId'
     | '/orders/$orderId'
     | '/admin/events/$eventId/map'
@@ -103,12 +163,36 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRouteWithChildren
+  AuthRoute: typeof AuthRoute
+  MeRoute: typeof MeRoute
+  PartnerRoute: typeof PartnerRoute
   EventsEventIdRoute: typeof EventsEventIdRouteWithChildren
   OrdersOrderIdRoute: typeof OrdersOrderIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/partner': {
+      id: '/partner'
+      path: '/partner'
+      fullPath: '/partner'
+      preLoaderRoute: typeof PartnerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/me': {
+      id: '/me'
+      path: '/me'
+      fullPath: '/me'
+      preLoaderRoute: typeof MeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin': {
       id: '/admin'
       path: '/admin'
@@ -137,6 +221,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EventsEventIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/partners': {
+      id: '/admin/partners'
+      path: '/partners'
+      fullPath: '/admin/partners'
+      preLoaderRoute: typeof AdminPartnersRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/events': {
+      id: '/admin/events'
+      path: '/events'
+      fullPath: '/admin/events'
+      preLoaderRoute: typeof AdminEventsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/events/$eventId/stands/$standId': {
       id: '/events/$eventId/stands/$standId'
       path: '/stands/$standId'
@@ -146,20 +244,34 @@ declare module '@tanstack/react-router' {
     }
     '/admin/events/$eventId/map': {
       id: '/admin/events/$eventId/map'
-      path: '/events/$eventId/map'
+      path: '/$eventId/map'
       fullPath: '/admin/events/$eventId/map'
       preLoaderRoute: typeof AdminEventsEventIdMapRouteImport
-      parentRoute: typeof AdminRoute
+      parentRoute: typeof AdminEventsRoute
     }
   }
 }
 
-interface AdminRouteChildren {
+interface AdminEventsRouteChildren {
   AdminEventsEventIdMapRoute: typeof AdminEventsEventIdMapRoute
 }
 
-const AdminRouteChildren: AdminRouteChildren = {
+const AdminEventsRouteChildren: AdminEventsRouteChildren = {
   AdminEventsEventIdMapRoute: AdminEventsEventIdMapRoute,
+}
+
+const AdminEventsRouteWithChildren = AdminEventsRoute._addFileChildren(
+  AdminEventsRouteChildren,
+)
+
+interface AdminRouteChildren {
+  AdminEventsRoute: typeof AdminEventsRouteWithChildren
+  AdminPartnersRoute: typeof AdminPartnersRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminEventsRoute: AdminEventsRouteWithChildren,
+  AdminPartnersRoute: AdminPartnersRoute,
 }
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
@@ -179,6 +291,9 @@ const EventsEventIdRouteWithChildren = EventsEventIdRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRouteWithChildren,
+  AuthRoute: AuthRoute,
+  MeRoute: MeRoute,
+  PartnerRoute: PartnerRoute,
   EventsEventIdRoute: EventsEventIdRouteWithChildren,
   OrdersOrderIdRoute: OrdersOrderIdRoute,
 }
