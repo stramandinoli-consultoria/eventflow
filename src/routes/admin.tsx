@@ -11,7 +11,7 @@ export const Route = createFileRoute("/admin")({
 });
 
 const statusVariant: Record<OrderStatus, "default" | "secondary" | "destructive" | "outline"> = {
-  received: "secondary", preparing: "default", ready: "outline", completed: "outline", cancelled: "destructive",
+  awaiting_payment: "secondary", preparing: "default", ready: "outline", completed: "outline", cancelled: "destructive",
 };
 
 function Admin() {
@@ -27,7 +27,7 @@ function Admin() {
     return {
       revenue,
       orders: orders.length,
-      active: orders.filter((o) => ["received", "preparing"].includes(o.status)).length,
+      active: orders.filter((o) => ["awaiting_payment", "preparing"].includes(o.status)).length,
       stands: stands.filter((s) => ["food", "drink", "beer", "dessert"].includes(s.category)).length,
     };
   }, [orders, stands]);
@@ -76,7 +76,7 @@ function Admin() {
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-bold">Pedidos em tempo real</h2>
             <div className="flex gap-1">
-              {(["all", "received", "preparing", "ready", "completed"] as const).map((f) => (
+              {(["all", "awaiting_payment", "preparing", "ready", "completed"] as const).map((f) => (
                 <button
                   key={f}
                   onClick={() => setFilter(f)}
@@ -115,7 +115,7 @@ function Admin() {
                         className="gradient-hero"
                         onClick={() => {
                           advanceOrder(o.id);
-                          const next = o.status === "received" ? "preparing" : o.status === "preparing" ? "ready" : "completed";
+                          const next = o.status === "awaiting_payment" ? "preparing" : o.status === "preparing" ? "ready" : "completed";
                           toast.success(`Pedido #${o.id}: ${statusLabel[next as OrderStatus]}`, {
                             description: next === "ready" ? `WhatsApp enviado para ${o.customerPhone}` : undefined,
                             icon: next === "ready" ? <MessageSquare className="w-4 h-4" /> : undefined,

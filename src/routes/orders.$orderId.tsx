@@ -8,10 +8,10 @@ export const Route = createFileRoute("/orders/$orderId")({
 });
 
 const ICONS: Record<OrderStatus, any> = {
-  received: Clock, preparing: ChefHat, ready: Bell, completed: PartyPopper, cancelled: XCircle,
+  awaiting_payment: Clock, preparing: ChefHat, ready: Bell, completed: PartyPopper, cancelled: XCircle,
 };
 
-const STEPS: OrderStatus[] = ["received", "preparing", "ready", "completed"];
+const STEPS: OrderStatus[] = ["awaiting_payment", "preparing", "ready", "completed"];
 
 function OrderPage() {
   const { orderId } = Route.useParams();
