@@ -1,5 +1,6 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useStore, standTypeLabel, type Stand, type StandType } from "@/lib/store";
+import { useShallow } from "zustand/react/shallow";
 import { EventMap } from "@/components/EventMap";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
