@@ -1,5 +1,6 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useStore, standTypeLabel, type Stand, type StandType } from "@/lib/store";
+import { useShallow } from "zustand/react/shallow";
 import { EventMap } from "@/components/EventMap";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -16,7 +17,7 @@ export const Route = createFileRoute("/admin/events/$eventId/map")({
 function MapBuilder() {
   const { eventId } = Route.useParams();
   const event = useStore((s) => s.events.find((e) => e.id === eventId));
-  const stands = useStore((s) => s.stands.filter((x) => x.eventId === eventId));
+  const stands = useStore(useShallow((s) => s.stands.filter((x) => x.eventId === eventId)));
   const upsertStand = useStore((s) => s.upsertStand);
   const removeStand = useStore((s) => s.removeStand);
   const [selectedId, setSelectedId] = useState<string | undefined>();

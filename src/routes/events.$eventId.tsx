@@ -1,5 +1,6 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useStore, standTypeLabel } from "@/lib/store";
+import { useShallow } from "zustand/react/shallow";
 import { EventMap } from "@/components/EventMap";
 import { Calendar, MapPin, Star, ArrowRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -11,7 +12,7 @@ export const Route = createFileRoute("/events/$eventId")({
 function EventPage() {
   const { eventId } = Route.useParams();
   const event = useStore((s) => s.events.find((e) => e.id === eventId));
-  const stands = useStore((s) => s.stands.filter((x) => x.eventId === eventId && ["food", "drink", "beer", "dessert"].includes(x.category)));
+  const stands = useStore(useShallow((s) => s.stands.filter((x) => x.eventId === eventId && ["food", "drink", "beer", "dessert"].includes(x.category))));
   if (!event) throw notFound();
 
   return (
