@@ -18,12 +18,25 @@ function MapBuilder() {
   const { eventId } = Route.useParams();
   const event = useStore((s) => s.events.find((e) => e.id === eventId));
   const stands = useStore(useShallow((s) => s.stands.filter((x) => x.eventId === eventId)));
+  const partners = useStore(useShallow((s) => s.partners.filter((p) => p.eventId === eventId)));
   const upsertStand = useStore((s) => s.upsertStand);
   const removeStand = useStore((s) => s.removeStand);
+  const upsertPartner = useStore((s) => s.upsertPartner);
   const [selectedId, setSelectedId] = useState<string | undefined>();
   if (!event) throw notFound();
 
   const selected = stands.find((s) => s.id === selectedId);
+  const linkedPartner = selected ? partners.find((p) => p.standId === selected.id) : null;
+
+  const linkPartner = (partnerId: string) => {
+    if (!selected) return;
+    // unlink any partner currently on this stand, then link the chosen one
+    partners.forEach((p) => {
+      if (p.standId === selected.id && p.id !== partnerId) upsertPartner({ ...p, standId: "" });
+    });
+    const p = partners.find((x) => x.id === partnerId);
+    if (p) upsertPartner({ ...p, standId: selected.id });
+  };
 
   const addStand = (type: StandType) => {
     const id = "s" + Date.now();
@@ -116,13 +129,28 @@ function MapBuilder() {
                   <Input type="number" value={selected.height} onChange={(e) => update({ height: Number(e.target.value) })} />
                 </div>
               </div>
+              <div className="space-y-1 pt-2 border-t border-border">
+                <Label className="text-xs">Empresa parceira vinculada</Label>
+                <Select value={linkedPartner?.id ?? "__none"} onValueChange={(v) => v !== "__none" && linkPartner(v)}>
+                  <SelectTrigger><SelectValue placeholder="Nenhuma" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__none">— Nenhuma —</SelectItem>
+                    {partners.map((p) => (
+                      <SelectItem key={p.id} value={p.id}>{p.companyName}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {linkedPartner && (
+                  <p className="text-xs text-success">✓ {linkedPartner.companyName} ({linkedPartner.email})</p>
+                )}
+              </div>
               <div className="text-xs text-muted-foreground pt-2 border-t border-border">
                 Posição: x={selected.x}, y={selected.y}
               </div>
             </div>
           ) : (
             <div className="rounded-2xl border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
-              Selecione uma barraca no mapa para editar suas propriedades.
+              Selecione uma barraca no mapa para editar suas propriedades e vincular um parceiro.
             </div>
           )}
         </aside>

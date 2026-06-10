@@ -287,9 +287,46 @@ export const useStore = create<State>()(
           ),
         })),
     }),
-    { name: "eventflow-store", version: 3 }
+    { name: "eventflow-store", version: 4 }
   )
 );
+
+// ---------- Real-time cross-tab/cross-session sync (BroadcastChannel + storage) ----------
+let _suppressBroadcast = false;
+const SYNC_KEYS = ["events", "stands", "products", "orders", "users", "partners"] as const;
+type SyncKey = (typeof SYNC_KEYS)[number];
+type SyncPayload = Partial<Pick<State, SyncKey>>;
+
+if (typeof window !== "undefined") {
+  const channel = "BroadcastChannel" in window ? new BroadcastChannel("eventflow-sync") : null;
+
+  const apply = (payload: SyncPayload) => {
+    _suppressBroadcast = true;
+    useStore.setState((st) => ({ ...st, ...payload }));
+    _suppressBroadcast = false;
+  };
+
+  channel?.addEventListener("message", (e) => apply(e.data as SyncPayload));
+
+  window.addEventListener("storage", (e) => {
+    if (e.key !== "eventflow-store" || !e.newValue) return;
+    try {
+      const parsed = JSON.parse(e.newValue);
+      if (parsed?.state) apply(parsed.state as SyncPayload);
+    } catch { /* ignore */ }
+  });
+
+  let prev = useStore.getState();
+  useStore.subscribe((state) => {
+    if (_suppressBroadcast) { prev = state; return; }
+    const payload: SyncPayload = {};
+    for (const k of SYNC_KEYS) {
+      if (state[k] !== prev[k]) (payload as Record<string, unknown>)[k] = state[k];
+    }
+    prev = state;
+    if (Object.keys(payload).length && channel) channel.postMessage(payload);
+  });
+}
 
 export const statusLabel: Record<OrderStatus, string> = {
   awaiting_payment: "Aguardando pagamento",

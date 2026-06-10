@@ -31,11 +31,15 @@ function PartnersAdmin() {
     const partnerId = form.id ?? "pt-" + Date.now();
     const standId = form.standId ?? "s-" + Date.now();
 
+    const existingStand = useStore.getState().stands.find((s) => s.id === standId);
     const stand: Stand = {
       id: standId, eventId: form.eventId!, name: form.companyName!,
       category: form.category as StandType, description: form.description ?? "",
       cover: form.logo || "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&q=80",
-      rating: 4.5, x: 40, y: 40, width: 120, height: 90,
+      rating: 4.5,
+      x: existingStand?.x ?? 40 + Math.floor(Math.random() * 20) * 20,
+      y: existingStand?.y ?? 40 + Math.floor(Math.random() * 14) * 20,
+      width: existingStand?.width ?? 120, height: existingStand?.height ?? 90,
     };
     upsertStand(stand);
 
