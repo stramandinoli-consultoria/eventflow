@@ -18,12 +18,25 @@ function MapBuilder() {
   const { eventId } = Route.useParams();
   const event = useStore((s) => s.events.find((e) => e.id === eventId));
   const stands = useStore(useShallow((s) => s.stands.filter((x) => x.eventId === eventId)));
+  const partners = useStore(useShallow((s) => s.partners.filter((p) => p.eventId === eventId)));
   const upsertStand = useStore((s) => s.upsertStand);
   const removeStand = useStore((s) => s.removeStand);
+  const upsertPartner = useStore((s) => s.upsertPartner);
   const [selectedId, setSelectedId] = useState<string | undefined>();
   if (!event) throw notFound();
 
   const selected = stands.find((s) => s.id === selectedId);
+  const linkedPartner = selected ? partners.find((p) => p.standId === selected.id) : null;
+
+  const linkPartner = (partnerId: string) => {
+    if (!selected) return;
+    // unlink any partner currently on this stand, then link the chosen one
+    partners.forEach((p) => {
+      if (p.standId === selected.id && p.id !== partnerId) upsertPartner({ ...p, standId: "" });
+    });
+    const p = partners.find((x) => x.id === partnerId);
+    if (p) upsertPartner({ ...p, standId: selected.id });
+  };
 
   const addStand = (type: StandType) => {
     const id = "s" + Date.now();
