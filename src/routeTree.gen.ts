@@ -14,10 +14,12 @@ import { Route as MeRouteImport } from './routes/me'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as OrdersOrderIdRouteImport } from './routes/orders.$orderId'
 import { Route as EventsEventIdRouteImport } from './routes/events.$eventId'
 import { Route as AdminPartnersRouteImport } from './routes/admin.partners'
 import { Route as AdminEventsRouteImport } from './routes/admin.events'
+import { Route as AdminEventsIndexRouteImport } from './routes/admin.events.index'
 import { Route as EventsEventIdStandsStandIdRouteImport } from './routes/events.$eventId.stands.$standId'
 import { Route as AdminEventsEventIdMapRouteImport } from './routes/admin.events.$eventId.map'
 
@@ -46,6 +48,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRoute,
+} as any)
 const OrdersOrderIdRoute = OrdersOrderIdRouteImport.update({
   id: '/orders/$orderId',
   path: '/orders/$orderId',
@@ -65,6 +72,11 @@ const AdminEventsRoute = AdminEventsRouteImport.update({
   id: '/events',
   path: '/events',
   getParentRoute: () => AdminRoute,
+} as any)
+const AdminEventsIndexRoute = AdminEventsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminEventsRoute,
 } as any)
 const EventsEventIdStandsStandIdRoute =
   EventsEventIdStandsStandIdRouteImport.update({
@@ -88,19 +100,21 @@ export interface FileRoutesByFullPath {
   '/admin/partners': typeof AdminPartnersRoute
   '/events/$eventId': typeof EventsEventIdRouteWithChildren
   '/orders/$orderId': typeof OrdersOrderIdRoute
+  '/admin/': typeof AdminIndexRoute
+  '/admin/events/': typeof AdminEventsIndexRoute
   '/admin/events/$eventId/map': typeof AdminEventsEventIdMapRoute
   '/events/$eventId/stands/$standId': typeof EventsEventIdStandsStandIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRoute
   '/me': typeof MeRoute
   '/partner': typeof PartnerRoute
-  '/admin/events': typeof AdminEventsRouteWithChildren
   '/admin/partners': typeof AdminPartnersRoute
   '/events/$eventId': typeof EventsEventIdRouteWithChildren
   '/orders/$orderId': typeof OrdersOrderIdRoute
+  '/admin': typeof AdminIndexRoute
+  '/admin/events': typeof AdminEventsIndexRoute
   '/admin/events/$eventId/map': typeof AdminEventsEventIdMapRoute
   '/events/$eventId/stands/$standId': typeof EventsEventIdStandsStandIdRoute
 }
@@ -115,6 +129,8 @@ export interface FileRoutesById {
   '/admin/partners': typeof AdminPartnersRoute
   '/events/$eventId': typeof EventsEventIdRouteWithChildren
   '/orders/$orderId': typeof OrdersOrderIdRoute
+  '/admin/': typeof AdminIndexRoute
+  '/admin/events/': typeof AdminEventsIndexRoute
   '/admin/events/$eventId/map': typeof AdminEventsEventIdMapRoute
   '/events/$eventId/stands/$standId': typeof EventsEventIdStandsStandIdRoute
 }
@@ -130,19 +146,21 @@ export interface FileRouteTypes {
     | '/admin/partners'
     | '/events/$eventId'
     | '/orders/$orderId'
+    | '/admin/'
+    | '/admin/events/'
     | '/admin/events/$eventId/map'
     | '/events/$eventId/stands/$standId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/admin'
     | '/auth'
     | '/me'
     | '/partner'
-    | '/admin/events'
     | '/admin/partners'
     | '/events/$eventId'
     | '/orders/$orderId'
+    | '/admin'
+    | '/admin/events'
     | '/admin/events/$eventId/map'
     | '/events/$eventId/stands/$standId'
   id:
@@ -156,6 +174,8 @@ export interface FileRouteTypes {
     | '/admin/partners'
     | '/events/$eventId'
     | '/orders/$orderId'
+    | '/admin/'
+    | '/admin/events/'
     | '/admin/events/$eventId/map'
     | '/events/$eventId/stands/$standId'
   fileRoutesById: FileRoutesById
@@ -207,6 +227,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/orders/$orderId': {
       id: '/orders/$orderId'
       path: '/orders/$orderId'
@@ -235,6 +262,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminEventsRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/events/': {
+      id: '/admin/events/'
+      path: '/'
+      fullPath: '/admin/events/'
+      preLoaderRoute: typeof AdminEventsIndexRouteImport
+      parentRoute: typeof AdminEventsRoute
+    }
     '/events/$eventId/stands/$standId': {
       id: '/events/$eventId/stands/$standId'
       path: '/stands/$standId'
@@ -253,10 +287,12 @@ declare module '@tanstack/react-router' {
 }
 
 interface AdminEventsRouteChildren {
+  AdminEventsIndexRoute: typeof AdminEventsIndexRoute
   AdminEventsEventIdMapRoute: typeof AdminEventsEventIdMapRoute
 }
 
 const AdminEventsRouteChildren: AdminEventsRouteChildren = {
+  AdminEventsIndexRoute: AdminEventsIndexRoute,
   AdminEventsEventIdMapRoute: AdminEventsEventIdMapRoute,
 }
 
@@ -267,11 +303,13 @@ const AdminEventsRouteWithChildren = AdminEventsRoute._addFileChildren(
 interface AdminRouteChildren {
   AdminEventsRoute: typeof AdminEventsRouteWithChildren
   AdminPartnersRoute: typeof AdminPartnersRoute
+  AdminIndexRoute: typeof AdminIndexRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
   AdminEventsRoute: AdminEventsRouteWithChildren,
   AdminPartnersRoute: AdminPartnersRoute,
+  AdminIndexRoute: AdminIndexRoute,
 }
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
