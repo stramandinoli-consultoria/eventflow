@@ -129,13 +129,28 @@ function MapBuilder() {
                   <Input type="number" value={selected.height} onChange={(e) => update({ height: Number(e.target.value) })} />
                 </div>
               </div>
+              <div className="space-y-1 pt-2 border-t border-border">
+                <Label className="text-xs">Empresa parceira vinculada</Label>
+                <Select value={linkedPartner?.id ?? "__none"} onValueChange={(v) => v !== "__none" && linkPartner(v)}>
+                  <SelectTrigger><SelectValue placeholder="Nenhuma" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__none">— Nenhuma —</SelectItem>
+                    {partners.map((p) => (
+                      <SelectItem key={p.id} value={p.id}>{p.companyName}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {linkedPartner && (
+                  <p className="text-xs text-success">✓ {linkedPartner.companyName} ({linkedPartner.email})</p>
+                )}
+              </div>
               <div className="text-xs text-muted-foreground pt-2 border-t border-border">
                 Posição: x={selected.x}, y={selected.y}
               </div>
             </div>
           ) : (
             <div className="rounded-2xl border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
-              Selecione uma barraca no mapa para editar suas propriedades.
+              Selecione uma barraca no mapa para editar suas propriedades e vincular um parceiro.
             </div>
           )}
         </aside>
