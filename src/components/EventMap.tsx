@@ -53,6 +53,7 @@ export function EventMap({ eventId, editable, onSelect, selectedId }: Props) {
         const Icon = ICONS[s.category];
         const isSel = selectedId === s.id;
         const color = standTypeColor[s.category];
+        const linkedPartner = partners.find((p) => p.standId === s.id);
         return (
           <div
             key={s.id}
@@ -72,8 +73,14 @@ export function EventMap({ eventId, editable, onSelect, selectedId }: Props) {
               boxShadow: `0 8px 24px -8px ${color}`,
             }}
           >
+            {linkedPartner && (
+              <span className="absolute -top-2 -right-2 w-3 h-3 rounded-full bg-success border-2 border-background" title={`Parceiro: ${linkedPartner.companyName}`} />
+            )}
             <Icon className="w-5 h-5" style={{ color }} />
             <span className="text-xs font-semibold text-foreground px-1 text-center leading-tight">{s.name}</span>
+            {editable && linkedPartner && (
+              <span className="text-[10px] text-success/90 truncate max-w-full px-1">● {linkedPartner.companyName}</span>
+            )}
           </div>
         );
       })}
