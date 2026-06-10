@@ -18,6 +18,7 @@ interface Props {
 
 export function EventMap({ eventId, editable, onSelect, selectedId }: Props) {
   const stands = useStore(useShallow((s) => s.stands.filter((x) => x.eventId === eventId)));
+  const partners = useStore(useShallow((s) => s.partners.filter((p) => p.eventId === eventId)));
   const moveStand = useStore((s) => s.moveStand);
   const navigate = useNavigate();
   const ref = useRef<HTMLDivElement>(null);
