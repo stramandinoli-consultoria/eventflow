@@ -19,6 +19,7 @@ import { Route as OrdersOrderIdRouteImport } from './routes/orders.$orderId'
 import { Route as EventsEventIdRouteImport } from './routes/events.$eventId'
 import { Route as AdminPartnersRouteImport } from './routes/admin.partners'
 import { Route as AdminEventsRouteImport } from './routes/admin.events'
+import { Route as AdminEventsIndexRouteImport } from './routes/admin.events.index'
 import { Route as EventsEventIdStandsStandIdRouteImport } from './routes/events.$eventId.stands.$standId'
 import { Route as AdminEventsEventIdMapRouteImport } from './routes/admin.events.$eventId.map'
 
@@ -72,6 +73,11 @@ const AdminEventsRoute = AdminEventsRouteImport.update({
   path: '/events',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminEventsIndexRoute = AdminEventsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminEventsRoute,
+} as any)
 const EventsEventIdStandsStandIdRoute =
   EventsEventIdStandsStandIdRouteImport.update({
     id: '/stands/$standId',
@@ -95,6 +101,7 @@ export interface FileRoutesByFullPath {
   '/events/$eventId': typeof EventsEventIdRouteWithChildren
   '/orders/$orderId': typeof OrdersOrderIdRoute
   '/admin/': typeof AdminIndexRoute
+  '/admin/events/': typeof AdminEventsIndexRoute
   '/admin/events/$eventId/map': typeof AdminEventsEventIdMapRoute
   '/events/$eventId/stands/$standId': typeof EventsEventIdStandsStandIdRoute
 }
@@ -103,11 +110,11 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/me': typeof MeRoute
   '/partner': typeof PartnerRoute
-  '/admin/events': typeof AdminEventsRouteWithChildren
   '/admin/partners': typeof AdminPartnersRoute
   '/events/$eventId': typeof EventsEventIdRouteWithChildren
   '/orders/$orderId': typeof OrdersOrderIdRoute
   '/admin': typeof AdminIndexRoute
+  '/admin/events': typeof AdminEventsIndexRoute
   '/admin/events/$eventId/map': typeof AdminEventsEventIdMapRoute
   '/events/$eventId/stands/$standId': typeof EventsEventIdStandsStandIdRoute
 }
@@ -123,6 +130,7 @@ export interface FileRoutesById {
   '/events/$eventId': typeof EventsEventIdRouteWithChildren
   '/orders/$orderId': typeof OrdersOrderIdRoute
   '/admin/': typeof AdminIndexRoute
+  '/admin/events/': typeof AdminEventsIndexRoute
   '/admin/events/$eventId/map': typeof AdminEventsEventIdMapRoute
   '/events/$eventId/stands/$standId': typeof EventsEventIdStandsStandIdRoute
 }
@@ -139,6 +147,7 @@ export interface FileRouteTypes {
     | '/events/$eventId'
     | '/orders/$orderId'
     | '/admin/'
+    | '/admin/events/'
     | '/admin/events/$eventId/map'
     | '/events/$eventId/stands/$standId'
   fileRoutesByTo: FileRoutesByTo
@@ -147,11 +156,11 @@ export interface FileRouteTypes {
     | '/auth'
     | '/me'
     | '/partner'
-    | '/admin/events'
     | '/admin/partners'
     | '/events/$eventId'
     | '/orders/$orderId'
     | '/admin'
+    | '/admin/events'
     | '/admin/events/$eventId/map'
     | '/events/$eventId/stands/$standId'
   id:
@@ -166,6 +175,7 @@ export interface FileRouteTypes {
     | '/events/$eventId'
     | '/orders/$orderId'
     | '/admin/'
+    | '/admin/events/'
     | '/admin/events/$eventId/map'
     | '/events/$eventId/stands/$standId'
   fileRoutesById: FileRoutesById
@@ -252,6 +262,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminEventsRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/events/': {
+      id: '/admin/events/'
+      path: '/'
+      fullPath: '/admin/events/'
+      preLoaderRoute: typeof AdminEventsIndexRouteImport
+      parentRoute: typeof AdminEventsRoute
+    }
     '/events/$eventId/stands/$standId': {
       id: '/events/$eventId/stands/$standId'
       path: '/stands/$standId'
@@ -270,10 +287,12 @@ declare module '@tanstack/react-router' {
 }
 
 interface AdminEventsRouteChildren {
+  AdminEventsIndexRoute: typeof AdminEventsIndexRoute
   AdminEventsEventIdMapRoute: typeof AdminEventsEventIdMapRoute
 }
 
 const AdminEventsRouteChildren: AdminEventsRouteChildren = {
+  AdminEventsIndexRoute: AdminEventsIndexRoute,
   AdminEventsEventIdMapRoute: AdminEventsEventIdMapRoute,
 }
 
@@ -319,3 +338,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
