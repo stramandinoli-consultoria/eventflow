@@ -291,11 +291,13 @@ export const useStore = create<State>()(
   )
 );
 
-// ---------- Real-time cross-tab/cross-session sync (BroadcastChannel + storage) ----------
+// ---------- Real-time cross-tab/cross-session sync (BroadcastChannel + storage + poll) ----------
 let _suppressBroadcast = false;
 const SYNC_KEYS = ["events", "stands", "products", "orders", "users", "partners"] as const;
 type SyncKey = (typeof SYNC_KEYS)[number];
 type SyncPayload = Partial<Pick<State, SyncKey>>;
+
+const STORAGE_KEY = "eventflow-store";
 
 if (typeof window !== "undefined") {
   const channel = "BroadcastChannel" in window ? new BroadcastChannel("eventflow-sync") : null;
@@ -306,15 +308,43 @@ if (typeof window !== "undefined") {
     _suppressBroadcast = false;
   };
 
+  const applyFromStorageString = (raw: string | null) => {
+    if (!raw) return;
+    try {
+      const parsed = JSON.parse(raw);
+      const incoming = parsed?.state as Partial<State> | undefined;
+      if (!incoming) return;
+      const current = useStore.getState();
+      const payload: SyncPayload = {};
+      for (const k of SYNC_KEYS) {
+        const inc = (incoming as Record<string, unknown>)[k];
+        if (inc === undefined) continue;
+        // Compare by JSON to catch updates coming from another tab/session (different refs).
+        if (JSON.stringify(inc) !== JSON.stringify((current as Record<string, unknown>)[k])) {
+          (payload as Record<string, unknown>)[k] = inc;
+        }
+      }
+      if (Object.keys(payload).length) apply(payload);
+    } catch { /* ignore */ }
+  };
+
   channel?.addEventListener("message", (e) => apply(e.data as SyncPayload));
 
   window.addEventListener("storage", (e) => {
-    if (e.key !== "eventflow-store" || !e.newValue) return;
-    try {
-      const parsed = JSON.parse(e.newValue);
-      if (parsed?.state) apply(parsed.state as SyncPayload);
-    } catch { /* ignore */ }
+    if (e.key !== STORAGE_KEY) return;
+    applyFromStorageString(e.newValue);
   });
+
+  // Safety-net poller — catches updates when storage/BroadcastChannel events
+  // don't fire (background tabs, some browsers, devtools open, etc.).
+  let lastRaw = localStorage.getItem(STORAGE_KEY);
+  setInterval(() => {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw && raw !== lastRaw) {
+      lastRaw = raw;
+      applyFromStorageString(raw);
+    }
+  }, 1200);
 
   let prev = useStore.getState();
   useStore.subscribe((state) => {
@@ -325,6 +355,8 @@ if (typeof window !== "undefined") {
     }
     prev = state;
     if (Object.keys(payload).length && channel) channel.postMessage(payload);
+    // keep lastRaw in sync so the poller doesn't re-apply our own writes
+    try { lastRaw = localStorage.getItem(STORAGE_KEY); } catch { /* ignore */ }
   });
 }
 
