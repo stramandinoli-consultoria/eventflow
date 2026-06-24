@@ -320,7 +320,7 @@ if (typeof window !== "undefined") {
         const inc = (incoming as Record<string, unknown>)[k];
         if (inc === undefined) continue;
         // Compare by JSON to catch updates coming from another tab/session (different refs).
-        if (JSON.stringify(inc) !== JSON.stringify((current as Record<string, unknown>)[k])) {
+        if (JSON.stringify(inc) !== JSON.stringify((current as unknown as Record<string, unknown>)[k])) {
           (payload as Record<string, unknown>)[k] = inc;
         }
       }
