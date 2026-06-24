@@ -19,6 +19,7 @@ import { Route as OrdersOrderIdRouteImport } from './routes/orders.$orderId'
 import { Route as EventsEventIdRouteImport } from './routes/events.$eventId'
 import { Route as AdminPartnersRouteImport } from './routes/admin.partners'
 import { Route as AdminEventsRouteImport } from './routes/admin.events'
+import { Route as EventsEventIdIndexRouteImport } from './routes/events.$eventId.index'
 import { Route as AdminEventsIndexRouteImport } from './routes/admin.events.index'
 import { Route as EventsEventIdStandsStandIdRouteImport } from './routes/events.$eventId.stands.$standId'
 import { Route as AdminEventsEventIdMapRouteImport } from './routes/admin.events.$eventId.map'
@@ -73,6 +74,11 @@ const AdminEventsRoute = AdminEventsRouteImport.update({
   path: '/events',
   getParentRoute: () => AdminRoute,
 } as any)
+const EventsEventIdIndexRoute = EventsEventIdIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => EventsEventIdRoute,
+} as any)
 const AdminEventsIndexRoute = AdminEventsIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -102,6 +108,7 @@ export interface FileRoutesByFullPath {
   '/orders/$orderId': typeof OrdersOrderIdRoute
   '/admin/': typeof AdminIndexRoute
   '/admin/events/': typeof AdminEventsIndexRoute
+  '/events/$eventId/': typeof EventsEventIdIndexRoute
   '/admin/events/$eventId/map': typeof AdminEventsEventIdMapRoute
   '/events/$eventId/stands/$standId': typeof EventsEventIdStandsStandIdRoute
 }
@@ -111,10 +118,10 @@ export interface FileRoutesByTo {
   '/me': typeof MeRoute
   '/partner': typeof PartnerRoute
   '/admin/partners': typeof AdminPartnersRoute
-  '/events/$eventId': typeof EventsEventIdRouteWithChildren
   '/orders/$orderId': typeof OrdersOrderIdRoute
   '/admin': typeof AdminIndexRoute
   '/admin/events': typeof AdminEventsIndexRoute
+  '/events/$eventId': typeof EventsEventIdIndexRoute
   '/admin/events/$eventId/map': typeof AdminEventsEventIdMapRoute
   '/events/$eventId/stands/$standId': typeof EventsEventIdStandsStandIdRoute
 }
@@ -131,6 +138,7 @@ export interface FileRoutesById {
   '/orders/$orderId': typeof OrdersOrderIdRoute
   '/admin/': typeof AdminIndexRoute
   '/admin/events/': typeof AdminEventsIndexRoute
+  '/events/$eventId/': typeof EventsEventIdIndexRoute
   '/admin/events/$eventId/map': typeof AdminEventsEventIdMapRoute
   '/events/$eventId/stands/$standId': typeof EventsEventIdStandsStandIdRoute
 }
@@ -148,6 +156,7 @@ export interface FileRouteTypes {
     | '/orders/$orderId'
     | '/admin/'
     | '/admin/events/'
+    | '/events/$eventId/'
     | '/admin/events/$eventId/map'
     | '/events/$eventId/stands/$standId'
   fileRoutesByTo: FileRoutesByTo
@@ -157,10 +166,10 @@ export interface FileRouteTypes {
     | '/me'
     | '/partner'
     | '/admin/partners'
-    | '/events/$eventId'
     | '/orders/$orderId'
     | '/admin'
     | '/admin/events'
+    | '/events/$eventId'
     | '/admin/events/$eventId/map'
     | '/events/$eventId/stands/$standId'
   id:
@@ -176,6 +185,7 @@ export interface FileRouteTypes {
     | '/orders/$orderId'
     | '/admin/'
     | '/admin/events/'
+    | '/events/$eventId/'
     | '/admin/events/$eventId/map'
     | '/events/$eventId/stands/$standId'
   fileRoutesById: FileRoutesById
@@ -262,6 +272,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminEventsRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/events/$eventId/': {
+      id: '/events/$eventId/'
+      path: '/'
+      fullPath: '/events/$eventId/'
+      preLoaderRoute: typeof EventsEventIdIndexRouteImport
+      parentRoute: typeof EventsEventIdRoute
+    }
     '/admin/events/': {
       id: '/admin/events/'
       path: '/'
@@ -315,10 +332,12 @@ const AdminRouteChildren: AdminRouteChildren = {
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
 interface EventsEventIdRouteChildren {
+  EventsEventIdIndexRoute: typeof EventsEventIdIndexRoute
   EventsEventIdStandsStandIdRoute: typeof EventsEventIdStandsStandIdRoute
 }
 
 const EventsEventIdRouteChildren: EventsEventIdRouteChildren = {
+  EventsEventIdIndexRoute: EventsEventIdIndexRoute,
   EventsEventIdStandsStandIdRoute: EventsEventIdStandsStandIdRoute,
 }
 
