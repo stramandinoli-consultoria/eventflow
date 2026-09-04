@@ -83,7 +83,7 @@ async function pushOrder(order: Order) {
     stand_name: order.standName,
     customer_name: order.customerName,
     customer_phone: order.customerPhone,
-    items: order.items,
+    items: order.items as unknown as import("@/integrations/supabase/types").Json,
     total: order.total,
     status: order.status,
     created_at: order.createdAt,
