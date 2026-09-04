@@ -2,6 +2,14 @@ import { auth, defineMcp } from "@lovable.dev/mcp-js";
 
 import whoamiTool from "./tools/whoami";
 import listEventsTool from "./tools/list-events";
+import listOrdersTool from "./tools/list-orders";
+import getOrderTool from "./tools/get-order";
+import updateOrderStatusTool from "./tools/update-order-status";
+import {
+  subscribeOrderUpdates,
+  listOrderSubscriptions,
+  unsubscribeOrderUpdates,
+} from "./tools/manage-webhooks";
 
 // A URL do Supabase é reescrita para o proxy .lovable.cloud na publicação,
 // e mcp-js rejeitaria essa URL como issuer (RFC 8414). O project ref é o

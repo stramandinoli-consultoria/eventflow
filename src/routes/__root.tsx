@@ -8,10 +8,12 @@ import {
   Scripts,
 } from "@tanstack/react-router";
 import { Toaster } from "sonner";
+import { useEffect } from "react";
 
 import appCss from "../styles.css?url";
 import { Nav } from "@/components/Nav";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { startOrderSync } from "@/lib/order-sync";
 
 function NotFoundComponent() {
   return (
@@ -84,6 +86,7 @@ function RootShell({ children }: { children: React.ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  useEffect(() => { startOrderSync(); }, []);
   return (
     <QueryClientProvider client={queryClient}>
       <ErrorBoundary>
