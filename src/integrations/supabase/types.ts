@@ -14,7 +14,116 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      ef_order_timeline: {
+        Row: {
+          at: string
+          id: string
+          note: string | null
+          order_id: string
+          status: string
+        }
+        Insert: {
+          at?: string
+          id?: string
+          note?: string | null
+          order_id: string
+          status: string
+        }
+        Update: {
+          at?: string
+          id?: string
+          note?: string | null
+          order_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ef_order_timeline_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "ef_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ef_orders: {
+        Row: {
+          created_at: string
+          customer_name: string
+          customer_phone: string | null
+          event_id: string
+          id: string
+          items: Json
+          stand_id: string
+          stand_name: string
+          status: string
+          total: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          customer_name: string
+          customer_phone?: string | null
+          event_id: string
+          id: string
+          items?: Json
+          stand_id: string
+          stand_name: string
+          status?: string
+          total?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          customer_name?: string
+          customer_phone?: string | null
+          event_id?: string
+          id?: string
+          items?: Json
+          stand_id?: string
+          stand_name?: string
+          status?: string
+          total?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      ef_webhooks: {
+        Row: {
+          active: boolean
+          created_at: string
+          event_id: string | null
+          id: string
+          last_sent_at: string | null
+          last_status: string | null
+          owner_email: string
+          stand_name: string | null
+          url: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          event_id?: string | null
+          id?: string
+          last_sent_at?: string | null
+          last_status?: string | null
+          owner_email?: string
+          stand_name?: string | null
+          url: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          event_id?: string | null
+          id?: string
+          last_sent_at?: string | null
+          last_status?: string | null
+          owner_email?: string
+          stand_name?: string | null
+          url?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
