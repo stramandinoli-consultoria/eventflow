@@ -12,7 +12,7 @@
   "mcp": {
     "server": {
       "name": "eventflow-mcp",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "title": "EventFlow MCP"
     },
     "tools": [
@@ -55,6 +55,193 @@
               ]
             }
           }
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_orders",
+        "title": "Listar pedidos",
+        "description": "Lista os pedidos do EventFlow, com filtro por evento, empresa parceira (barraca) e status. Inclui opcionalmente a timeline de cada pedido.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "event_id": {
+              "description": "ID do evento, ex.: ev1.",
+              "type": "string"
+            },
+            "stand_name": {
+              "description": "Nome da empresa parceira / barraca (busca parcial).",
+              "type": "string"
+            },
+            "status": {
+              "description": "Filtra por status do pedido.",
+              "type": "string",
+              "enum": [
+                "awaiting_payment",
+                "preparing",
+                "ready",
+                "completed",
+                "cancelled"
+              ]
+            },
+            "include_timeline": {
+              "description": "Inclui a timeline de cada pedido (padrão: true).",
+              "type": "boolean"
+            },
+            "limit": {
+              "description": "Máximo de pedidos (padrão: 25).",
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            }
+          }
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "get_order",
+        "title": "Detalhar pedido",
+        "description": "Retorna um pedido do EventFlow com itens, status atual e a timeline completa.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "order_id": {
+              "type": "string",
+              "minLength": 1,
+              "description": "ID do pedido, ex.: ord-1042."
+            }
+          },
+          "required": [
+            "order_id"
+          ]
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "update_order_status",
+        "title": "Atualizar status do pedido",
+        "description": "Atualiza o status de um pedido (ex.: marcar como pronto), registra automaticamente a timeline e dispara os webhooks cadastrados.",
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "openWorldHint": true
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "order_id": {
+              "type": "string",
+              "minLength": 1,
+              "description": "ID do pedido, ex.: ord-1042."
+            },
+            "status": {
+              "type": "string",
+              "enum": [
+                "awaiting_payment",
+                "preparing",
+                "ready",
+                "completed",
+                "cancelled"
+              ],
+              "description": "Novo status do pedido."
+            },
+            "note": {
+              "description": "Observação registrada na timeline.",
+              "type": "string",
+              "maxLength": 280
+            }
+          },
+          "required": [
+            "order_id",
+            "status"
+          ]
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "subscribe_order_updates",
+        "title": "Assinar avisos de pedidos",
+        "description": "Cadastra um endereço de webhook que recebe um POST em JSON sempre que o status de um pedido mudar. Pode filtrar por evento e/ou empresa parceira.",
+        "annotations": {
+          "readOnlyHint": false,
+          "openWorldHint": true
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "url": {
+              "type": "string",
+              "format": "uri",
+              "description": "URL https que receberá o POST de notificação."
+            },
+            "event_id": {
+              "description": "Notificar apenas pedidos deste evento.",
+              "type": "string"
+            },
+            "stand_name": {
+              "description": "Notificar apenas pedidos desta empresa parceira.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "url"
+          ]
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_order_subscriptions",
+        "title": "Listar avisos cadastrados",
+        "description": "Lista os webhooks de notificação de pedidos cadastrados pelo usuário conectado.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {}
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "unsubscribe_order_updates",
+        "title": "Remover aviso de pedidos",
+        "description": "Remove um webhook de notificação de pedidos cadastrado pelo usuário conectado.",
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "webhook_id": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "description": "ID do webhook a remover."
+            }
+          },
+          "required": [
+            "webhook_id"
+          ]
         },
         "outputSchema": null
       }
