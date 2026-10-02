@@ -3,7 +3,9 @@ import { z } from "zod";
 import { supabaseForUser } from "../supabase";
 import { dispatchWebhooks } from "../notify";
 
-const DEFAULT_NOTE: Record<string, string> = {
+export const ORDER_STATUSES = ["awaiting_payment", "preparing", "ready", "completed", "cancelled"] as const;
+
+export const DEFAULT_NOTE: Record<string, string> = {
   preparing: "Pagamento confirmado no caixa",
   ready: "Notificação WhatsApp enviada",
   completed: "Pedido entregue ao cliente",
@@ -17,9 +19,7 @@ export default defineTool({
     "Atualiza o status de um pedido (ex.: marcar como pronto), registra automaticamente a timeline e dispara os webhooks cadastrados.",
   inputSchema: {
     order_id: z.string().trim().min(1).describe("ID do pedido, ex.: ord-1042."),
-    status: z
-      .enum(["awaiting_payment", "preparing", "ready", "completed", "cancelled"])
-      .describe("Novo status do pedido."),
+    status: z.enum(ORDER_STATUSES).describe("Novo status do pedido."),
     note: z.string().trim().max(280).optional().describe("Observação registrada na timeline."),
   },
   annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: true },
