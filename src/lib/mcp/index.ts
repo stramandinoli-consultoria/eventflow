@@ -17,9 +17,9 @@ import {
 const projectRef = import.meta.env.VITE_SUPABASE_PROJECT_ID ?? "project-ref-unset";
 
 export default defineMcp({
-  name: "eventflow-mcp",
-  title: "EventFlow MCP",
-  version: "0.2.0",
+  name: "orderup-events",
+  title: "OrderUp Events",
+  version: "0.3.0",
   instructions:
     "Ferramentas do EventFlow para clientes MCP autenticados. Use `list_orders` e `get_order` para consultar pedidos por evento/empresa com timeline, `update_order_status` para mudar o status (a timeline é registrada automaticamente) e `subscribe_order_updates` para receber webhooks em tempo real.",
   auth: auth.oauth.issuer({
