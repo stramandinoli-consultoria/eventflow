@@ -88,6 +88,106 @@ export type Database = {
         }
         Relationships: []
       }
+      ef_webhook_attempts: {
+        Row: {
+          at: string
+          attempt: number
+          delivery_id: string
+          duration_ms: number | null
+          error: string | null
+          id: string
+          ok: boolean
+          owner_email: string
+          response_status: number | null
+        }
+        Insert: {
+          at?: string
+          attempt: number
+          delivery_id: string
+          duration_ms?: number | null
+          error?: string | null
+          id?: string
+          ok: boolean
+          owner_email?: string
+          response_status?: number | null
+        }
+        Update: {
+          at?: string
+          attempt?: number
+          delivery_id?: string
+          duration_ms?: number | null
+          error?: string | null
+          id?: string
+          ok?: boolean
+          owner_email?: string
+          response_status?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ef_webhook_attempts_delivery_id_fkey"
+            columns: ["delivery_id"]
+            isOneToOne: false
+            referencedRelation: "ef_webhook_deliveries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ef_webhook_deliveries: {
+        Row: {
+          attempts: number
+          created_at: string
+          id: string
+          last_error: string | null
+          last_response_status: number | null
+          max_attempts: number
+          next_attempt_at: string
+          order_id: string | null
+          owner_email: string
+          payload: Json
+          status: string
+          updated_at: string
+          webhook_id: string
+        }
+        Insert: {
+          attempts?: number
+          created_at?: string
+          id?: string
+          last_error?: string | null
+          last_response_status?: number | null
+          max_attempts?: number
+          next_attempt_at?: string
+          order_id?: string | null
+          owner_email?: string
+          payload: Json
+          status?: string
+          updated_at?: string
+          webhook_id: string
+        }
+        Update: {
+          attempts?: number
+          created_at?: string
+          id?: string
+          last_error?: string | null
+          last_response_status?: number | null
+          max_attempts?: number
+          next_attempt_at?: string
+          order_id?: string | null
+          owner_email?: string
+          payload?: Json
+          status?: string
+          updated_at?: string
+          webhook_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ef_webhook_deliveries_webhook_id_fkey"
+            columns: ["webhook_id"]
+            isOneToOne: false
+            referencedRelation: "ef_webhooks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ef_webhooks: {
         Row: {
           active: boolean
@@ -97,6 +197,7 @@ export type Database = {
           last_sent_at: string | null
           last_status: string | null
           owner_email: string
+          secret: string
           stand_name: string | null
           url: string
         }
@@ -108,6 +209,7 @@ export type Database = {
           last_sent_at?: string | null
           last_status?: string | null
           owner_email?: string
+          secret?: string
           stand_name?: string | null
           url: string
         }
@@ -119,6 +221,7 @@ export type Database = {
           last_sent_at?: string | null
           last_status?: string | null
           owner_email?: string
+          secret?: string
           stand_name?: string | null
           url?: string
         }

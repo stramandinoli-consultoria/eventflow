@@ -6,7 +6,7 @@ export const subscribeOrderUpdates = defineTool({
   name: "subscribe_order_updates",
   title: "Assinar avisos de pedidos",
   description:
-    "Cadastra um endereço de webhook que recebe um POST em JSON sempre que o status de um pedido mudar. Pode filtrar por evento e/ou empresa parceira.",
+    "Cadastra um webhook que recebe um POST em JSON assinado com HMAC-SHA256 sempre que o status de um pedido mudar, com reenvio automático em caso de falha. Pode filtrar por evento e/ou empresa parceira.",
   inputSchema: {
     url: z.string().url().describe("URL https que receberá o POST de notificação."),
     event_id: z.string().optional().describe("Notificar apenas pedidos deste evento."),
@@ -21,12 +21,22 @@ export const subscribeOrderUpdates = defineTool({
     const { data, error } = await supabase
       .from("ef_webhooks")
       .insert({ url, event_id: event_id ?? null, stand_name: stand_name ?? null })
-      .select()
+      .select("id, url, event_id, stand_name, active, created_at, secret")
       .maybeSingle();
     if (error) return { content: [{ type: "text", text: error.message }], isError: true };
+    const payload = {
+      webhook: data,
+      signature: {
+        header: "X-EventFlow-Signature",
+        format: "t=<unix_timestamp>,v1=<hex_hmac_sha256>",
+        signed_content: "`${t}.${raw_body}`",
+        algorithm: "HMAC-SHA256 com o campo `secret` (guarde-o: ele só é exibido agora)",
+      },
+      retry_policy: "Até 6 tentativas com espera exponencial (30s, 60s, 120s, 240s, 480s).",
+    };
     return {
-      content: [{ type: "text", text: JSON.stringify(data, null, 2) }],
-      structuredContent: { webhook: data },
+      content: [{ type: "text", text: JSON.stringify(payload, null, 2) }],
+      structuredContent: payload,
     };
   },
 });
@@ -44,7 +54,7 @@ export const listOrderSubscriptions = defineTool({
     const supabase = supabaseForUser(ctx);
     const { data, error } = await supabase
       .from("ef_webhooks")
-      .select("*")
+      .select("id, url, event_id, stand_name, active, last_status, last_sent_at, created_at")
       .order("created_at", { ascending: false });
     if (error) return { content: [{ type: "text", text: error.message }], isError: true };
     return {

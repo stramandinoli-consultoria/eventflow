@@ -174,7 +174,7 @@
       {
         "name": "subscribe_order_updates",
         "title": "Assinar avisos de pedidos",
-        "description": "Cadastra um endereço de webhook que recebe um POST em JSON sempre que o status de um pedido mudar. Pode filtrar por evento e/ou empresa parceira.",
+        "description": "Cadastra um webhook que recebe um POST em JSON assinado com HMAC-SHA256 sempre que o status de um pedido mudar, com reenvio automático em caso de falha. Pode filtrar por evento e/ou empresa parceira.",
         "annotations": {
           "readOnlyHint": false,
           "openWorldHint": true
