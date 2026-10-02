@@ -11,9 +11,9 @@
   },
   "mcp": {
     "server": {
-      "name": "eventflow-mcp",
-      "version": "0.2.0",
-      "title": "EventFlow MCP"
+      "name": "orderup-events",
+      "version": "0.3.0",
+      "title": "OrderUp Events"
     },
     "tools": [
       {
