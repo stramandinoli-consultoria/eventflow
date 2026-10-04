@@ -21,6 +21,7 @@ import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } fr
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AdminEventsRouteImport } from './routes/admin.events'
 import { Route as AdminPartnersRouteImport } from './routes/admin.partners'
+import { Route as DocsMcpRouteImport } from './routes/docs.mcp'
 import { Route as EventsEventIdRouteImport } from './routes/events.$eventId'
 import { Route as OrdersOrderIdRouteImport } from './routes/orders.$orderId'
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
@@ -28,6 +29,7 @@ import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[
 import { Route as AdminEventsIndexRouteImport } from './routes/admin.events.index'
 import { Route as EventsEventIdIndexRouteImport } from './routes/events.$eventId.index'
 import { Route as AdminEventsEventIdMapRouteImport } from './routes/admin.events.$eventId.map'
+import { Route as ApiPublicWebhooksRetryRouteImport } from './routes/api/public/webhooks/retry'
 import { Route as EventsEventIdStandsStandIdRouteImport } from './routes/events.$eventId.stands.$standId'
 
 const IndexRoute = IndexRouteImport.update({
@@ -92,6 +94,11 @@ const AdminPartnersRoute = AdminPartnersRouteImport.update({
   path: '/partners',
   getParentRoute: () => AdminRoute,
 } as any)
+const DocsMcpRoute = DocsMcpRouteImport.update({
+  id: '/docs/mcp',
+  path: '/docs/mcp',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const EventsEventIdRoute = EventsEventIdRouteImport.update({
   id: '/events/$eventId',
   path: '/events/$eventId',
@@ -128,6 +135,11 @@ const AdminEventsEventIdMapRoute = AdminEventsEventIdMapRouteImport.update({
   path: '/$eventId/map',
   getParentRoute: () => AdminEventsRoute,
 } as any)
+const ApiPublicWebhooksRetryRoute = ApiPublicWebhooksRetryRouteImport.update({
+  id: '/api/public/webhooks/retry',
+  path: '/api/public/webhooks/retry',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const EventsEventIdStandsStandIdRoute =
   EventsEventIdStandsStandIdRouteImport.update({
     id: '/stands/$standId',
@@ -147,6 +159,7 @@ export interface FileRoutesByFullPath {
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/admin/events': typeof AdminEventsRouteWithChildren
   '/admin/partners': typeof AdminPartnersRoute
+  '/docs/mcp': typeof DocsMcpRoute
   '/events/$eventId': typeof EventsEventIdRouteWithChildren
   '/orders/$orderId': typeof OrdersOrderIdRoute
   '/admin/': typeof AdminIndexRoute
@@ -155,6 +168,7 @@ export interface FileRoutesByFullPath {
   '/admin/events/': typeof AdminEventsIndexRoute
   '/events/$eventId/': typeof EventsEventIdIndexRoute
   '/admin/events/$eventId/map': typeof AdminEventsEventIdMapRoute
+  '/api/public/webhooks/retry': typeof ApiPublicWebhooksRetryRoute
   '/events/$eventId/stands/$standId': typeof EventsEventIdStandsStandIdRoute
 }
 export interface FileRoutesByTo {
@@ -167,6 +181,7 @@ export interface FileRoutesByTo {
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/admin/partners': typeof AdminPartnersRoute
+  '/docs/mcp': typeof DocsMcpRoute
   '/orders/$orderId': typeof OrdersOrderIdRoute
   '/admin': typeof AdminIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
@@ -174,6 +189,7 @@ export interface FileRoutesByTo {
   '/admin/events': typeof AdminEventsIndexRoute
   '/events/$eventId': typeof EventsEventIdIndexRoute
   '/admin/events/$eventId/map': typeof AdminEventsEventIdMapRoute
+  '/api/public/webhooks/retry': typeof ApiPublicWebhooksRetryRoute
   '/events/$eventId/stands/$standId': typeof EventsEventIdStandsStandIdRoute
 }
 export interface FileRoutesById {
@@ -189,6 +205,7 @@ export interface FileRoutesById {
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/admin/events': typeof AdminEventsRouteWithChildren
   '/admin/partners': typeof AdminPartnersRoute
+  '/docs/mcp': typeof DocsMcpRoute
   '/events/$eventId': typeof EventsEventIdRouteWithChildren
   '/orders/$orderId': typeof OrdersOrderIdRoute
   '/admin/': typeof AdminIndexRoute
@@ -197,6 +214,7 @@ export interface FileRoutesById {
   '/admin/events/': typeof AdminEventsIndexRoute
   '/events/$eventId/': typeof EventsEventIdIndexRoute
   '/admin/events/$eventId/map': typeof AdminEventsEventIdMapRoute
+  '/api/public/webhooks/retry': typeof ApiPublicWebhooksRetryRoute
   '/events/$eventId/stands/$standId': typeof EventsEventIdStandsStandIdRoute
 }
 export interface FileRouteTypes {
@@ -213,6 +231,7 @@ export interface FileRouteTypes {
     | '/.well-known/oauth-protected-resource'
     | '/admin/events'
     | '/admin/partners'
+    | '/docs/mcp'
     | '/events/$eventId'
     | '/orders/$orderId'
     | '/admin/'
@@ -221,6 +240,7 @@ export interface FileRouteTypes {
     | '/admin/events/'
     | '/events/$eventId/'
     | '/admin/events/$eventId/map'
+    | '/api/public/webhooks/retry'
     | '/events/$eventId/stands/$standId'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -233,6 +253,7 @@ export interface FileRouteTypes {
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/admin/partners'
+    | '/docs/mcp'
     | '/orders/$orderId'
     | '/admin'
     | '/.lovable/oauth/consent'
@@ -240,6 +261,7 @@ export interface FileRouteTypes {
     | '/admin/events'
     | '/events/$eventId'
     | '/admin/events/$eventId/map'
+    | '/api/public/webhooks/retry'
     | '/events/$eventId/stands/$standId'
   id:
     | '__root__'
@@ -254,6 +276,7 @@ export interface FileRouteTypes {
     | '/.well-known/oauth-protected-resource'
     | '/admin/events'
     | '/admin/partners'
+    | '/docs/mcp'
     | '/events/$eventId'
     | '/orders/$orderId'
     | '/admin/'
@@ -262,6 +285,7 @@ export interface FileRouteTypes {
     | '/admin/events/'
     | '/events/$eventId/'
     | '/admin/events/$eventId/map'
+    | '/api/public/webhooks/retry'
     | '/events/$eventId/stands/$standId'
   fileRoutesById: FileRoutesById
 }
@@ -275,10 +299,12 @@ export interface RootRouteChildren {
   PartnerRoute: typeof PartnerRoute
   Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  DocsMcpRoute: typeof DocsMcpRoute
   EventsEventIdRoute: typeof EventsEventIdRouteWithChildren
   OrdersOrderIdRoute: typeof OrdersOrderIdRoute
   DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
+  ApiPublicWebhooksRetryRoute: typeof ApiPublicWebhooksRetryRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -367,6 +393,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminPartnersRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/docs/mcp': {
+      id: '/docs/mcp'
+      path: '/docs/mcp'
+      fullPath: '/docs/mcp'
+      preLoaderRoute: typeof DocsMcpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/events/$eventId': {
       id: '/events/$eventId'
       path: '/events/$eventId'
@@ -415,6 +448,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/events/$eventId/map'
       preLoaderRoute: typeof AdminEventsEventIdMapRouteImport
       parentRoute: typeof AdminEventsRoute
+    }
+    '/api/public/webhooks/retry': {
+      id: '/api/public/webhooks/retry'
+      path: '/api/public/webhooks/retry'
+      fullPath: '/api/public/webhooks/retry'
+      preLoaderRoute: typeof ApiPublicWebhooksRetryRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/events/$eventId/stands/$standId': {
       id: '/events/$eventId/stands/$standId'
@@ -479,10 +519,12 @@ const rootRouteChildren: RootRouteChildren = {
   Char91DotmcpChar93ListToolsRoute: Char91DotmcpChar93ListToolsRoute,
   Char91DotwellKnownChar93OauthProtectedResourceRoute:
     Char91DotwellKnownChar93OauthProtectedResourceRoute,
+  DocsMcpRoute: DocsMcpRoute,
   EventsEventIdRoute: EventsEventIdRouteWithChildren,
   OrdersOrderIdRoute: OrdersOrderIdRoute,
   DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
+  ApiPublicWebhooksRetryRoute: ApiPublicWebhooksRetryRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
