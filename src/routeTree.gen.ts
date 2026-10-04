@@ -28,6 +28,7 @@ import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[
 import { Route as AdminEventsIndexRouteImport } from './routes/admin.events.index'
 import { Route as EventsEventIdIndexRouteImport } from './routes/events.$eventId.index'
 import { Route as AdminEventsEventIdMapRouteImport } from './routes/admin.events.$eventId.map'
+import { Route as ApiPublicWebhooksRetryRouteImport } from './routes/api/public/webhooks/retry'
 import { Route as EventsEventIdStandsStandIdRouteImport } from './routes/events.$eventId.stands.$standId'
 
 const IndexRoute = IndexRouteImport.update({
@@ -128,6 +129,11 @@ const AdminEventsEventIdMapRoute = AdminEventsEventIdMapRouteImport.update({
   path: '/$eventId/map',
   getParentRoute: () => AdminEventsRoute,
 } as any)
+const ApiPublicWebhooksRetryRoute = ApiPublicWebhooksRetryRouteImport.update({
+  id: '/api/public/webhooks/retry',
+  path: '/api/public/webhooks/retry',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const EventsEventIdStandsStandIdRoute =
   EventsEventIdStandsStandIdRouteImport.update({
     id: '/stands/$standId',
@@ -155,6 +161,7 @@ export interface FileRoutesByFullPath {
   '/admin/events/': typeof AdminEventsIndexRoute
   '/events/$eventId/': typeof EventsEventIdIndexRoute
   '/admin/events/$eventId/map': typeof AdminEventsEventIdMapRoute
+  '/api/public/webhooks/retry': typeof ApiPublicWebhooksRetryRoute
   '/events/$eventId/stands/$standId': typeof EventsEventIdStandsStandIdRoute
 }
 export interface FileRoutesByTo {
@@ -174,6 +181,7 @@ export interface FileRoutesByTo {
   '/admin/events': typeof AdminEventsIndexRoute
   '/events/$eventId': typeof EventsEventIdIndexRoute
   '/admin/events/$eventId/map': typeof AdminEventsEventIdMapRoute
+  '/api/public/webhooks/retry': typeof ApiPublicWebhooksRetryRoute
   '/events/$eventId/stands/$standId': typeof EventsEventIdStandsStandIdRoute
 }
 export interface FileRoutesById {
@@ -197,6 +205,7 @@ export interface FileRoutesById {
   '/admin/events/': typeof AdminEventsIndexRoute
   '/events/$eventId/': typeof EventsEventIdIndexRoute
   '/admin/events/$eventId/map': typeof AdminEventsEventIdMapRoute
+  '/api/public/webhooks/retry': typeof ApiPublicWebhooksRetryRoute
   '/events/$eventId/stands/$standId': typeof EventsEventIdStandsStandIdRoute
 }
 export interface FileRouteTypes {
@@ -221,6 +230,7 @@ export interface FileRouteTypes {
     | '/admin/events/'
     | '/events/$eventId/'
     | '/admin/events/$eventId/map'
+    | '/api/public/webhooks/retry'
     | '/events/$eventId/stands/$standId'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -240,6 +250,7 @@ export interface FileRouteTypes {
     | '/admin/events'
     | '/events/$eventId'
     | '/admin/events/$eventId/map'
+    | '/api/public/webhooks/retry'
     | '/events/$eventId/stands/$standId'
   id:
     | '__root__'
@@ -262,6 +273,7 @@ export interface FileRouteTypes {
     | '/admin/events/'
     | '/events/$eventId/'
     | '/admin/events/$eventId/map'
+    | '/api/public/webhooks/retry'
     | '/events/$eventId/stands/$standId'
   fileRoutesById: FileRoutesById
 }
@@ -279,6 +291,7 @@ export interface RootRouteChildren {
   OrdersOrderIdRoute: typeof OrdersOrderIdRoute
   DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
+  ApiPublicWebhooksRetryRoute: typeof ApiPublicWebhooksRetryRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -416,6 +429,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminEventsEventIdMapRouteImport
       parentRoute: typeof AdminEventsRoute
     }
+    '/api/public/webhooks/retry': {
+      id: '/api/public/webhooks/retry'
+      path: '/api/public/webhooks/retry'
+      fullPath: '/api/public/webhooks/retry'
+      preLoaderRoute: typeof ApiPublicWebhooksRetryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/events/$eventId/stands/$standId': {
       id: '/events/$eventId/stands/$standId'
       path: '/stands/$standId'
@@ -483,6 +503,7 @@ const rootRouteChildren: RootRouteChildren = {
   OrdersOrderIdRoute: OrdersOrderIdRoute,
   DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
+  ApiPublicWebhooksRetryRoute: ApiPublicWebhooksRetryRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

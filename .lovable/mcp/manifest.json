@@ -12,7 +12,7 @@
   "mcp": {
     "server": {
       "name": "orderup-events",
-      "version": "0.3.0",
+      "version": "0.4.0",
       "title": "OrderUp Events"
     },
     "tools": [
@@ -61,7 +61,7 @@
       {
         "name": "list_orders",
         "title": "Listar pedidos",
-        "description": "Lista os pedidos do EventFlow, com filtro por evento, empresa parceira (barraca) e status. Inclui opcionalmente a timeline de cada pedido.",
+        "description": "Lista os pedidos do EventFlow com paginação e ordenação por data de criação, filtrando por evento, empresa parceira (barraca) e status. Inclui opcionalmente a timeline de cada pedido.",
         "annotations": {
           "readOnlyHint": true,
           "idempotentHint": true,
@@ -95,10 +95,24 @@
               "type": "boolean"
             },
             "limit": {
-              "description": "Máximo de pedidos (padrão: 25).",
+              "description": "Pedidos por página (padrão: 25).",
               "type": "integer",
               "minimum": 1,
               "maximum": 100
+            },
+            "page": {
+              "description": "Número da página, começando em 1 (padrão: 1).",
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9007199254740991
+            },
+            "sort": {
+              "description": "Ordenação por data de criação (padrão: mais recentes primeiro).",
+              "type": "string",
+              "enum": [
+                "created_at_desc",
+                "created_at_asc"
+              ]
             }
           }
         },
@@ -166,6 +180,53 @@
           },
           "required": [
             "order_id",
+            "status"
+          ]
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "bulk_update_order_status",
+        "title": "Atualizar status em lote",
+        "description": "Atualiza o status de vários pedidos de uma vez, registra a timeline de cada um e dispara os webhooks. Retorna o resultado individual de cada pedido.",
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "openWorldHint": true
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "order_ids": {
+              "minItems": 1,
+              "maxItems": 100,
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "description": "IDs dos pedidos, ex.: [\"ord-1042\", \"ord-1043\"]."
+            },
+            "status": {
+              "type": "string",
+              "enum": [
+                "awaiting_payment",
+                "preparing",
+                "ready",
+                "completed",
+                "cancelled"
+              ],
+              "description": "Novo status aplicado a todos os pedidos."
+            },
+            "note": {
+              "description": "Observação registrada na timeline de cada pedido.",
+              "type": "string",
+              "maxLength": 280
+            }
+          },
+          "required": [
+            "order_ids",
             "status"
           ]
         },
@@ -242,6 +303,77 @@
           "required": [
             "webhook_id"
           ]
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_webhook_deliveries",
+        "title": "Auditar entregas de webhooks",
+        "description": "Lista as entregas de webhooks do usuário conectado com status, número de tentativas, próximo reenvio e o histórico de cada tentativa.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "status": {
+              "description": "Filtra por status da entrega.",
+              "type": "string",
+              "enum": [
+                "pending",
+                "delivered",
+                "failed"
+              ]
+            },
+            "webhook_id": {
+              "description": "Filtra por webhook.",
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            },
+            "order_id": {
+              "description": "Filtra por pedido.",
+              "type": "string"
+            },
+            "limit": {
+              "description": "Máximo de entregas (padrão: 25).",
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            },
+            "offset": {
+              "description": "Quantas entregas pular (padrão: 0).",
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            }
+          }
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "retry_webhook_deliveries",
+        "title": "Reenviar webhooks",
+        "description": "Reenvia agora as entregas pendentes que já passaram do horário de reenvio, ou força o reenvio de uma entrega específica (inclusive falhas definitivas).",
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "openWorldHint": true
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "delivery_id": {
+              "description": "Entrega específica a reenviar agora.",
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            }
+          }
         },
         "outputSchema": null
       }
