@@ -16,15 +16,15 @@ function EventPage() {
   if (!event) throw notFound();
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-8">
-      <div className="relative rounded-3xl overflow-hidden h-64 mb-8 border border-border">
+    <div className="max-w-7xl mx-auto px-4 py-5 sm:px-6 sm:py-8">
+      <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden h-64 mb-8 border border-border">
         <img src={event.banner} alt={event.name} className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
-        <div className="absolute bottom-0 left-0 right-0 p-8">
+        <div className="absolute bottom-0 left-0 right-0 p-5 sm:p-8">
           <Badge className="mb-3" variant={event.status === "live" ? "default" : "secondary"}>
             {event.status === "live" ? "🔴 Ao vivo agora" : "Em breve"}
           </Badge>
-          <h1 className="text-4xl md:text-5xl font-bold mb-3">{event.name}</h1>
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-3">{event.name}</h1>
           <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
             <span className="flex items-center gap-2"><Calendar className="w-4 h-4 text-primary" />{event.date}</span>
             <span className="flex items-center gap-2"><MapPin className="w-4 h-4 text-primary" />{event.location}</span>
@@ -34,9 +34,9 @@ function EventPage() {
 
       <div className="grid lg:grid-cols-[1fr_360px] gap-8">
         <div>
-          <div className="flex items-center justify-between mb-4">
+          <div className="grid grid-cols-1 gap-1 mb-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
             <h2 className="text-2xl font-bold">Mapa do evento</h2>
-            <p className="text-sm text-muted-foreground">Clique numa barraca para ver o cardápio</p>
+            <p className="text-sm text-muted-foreground">Toque numa barraca para ver o cardápio</p>
           </div>
           <EventMap eventId={eventId} />
         </div>
