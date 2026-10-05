@@ -65,23 +65,23 @@ function MapBuilder() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-8">
+    <div className="max-w-7xl mx-auto px-4 py-5 sm:px-6 sm:py-8">
       <Link to="/admin" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-4">
         <ChevronLeft className="w-4 h-4" /> Voltar ao admin
       </Link>
 
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-3xl font-bold">{event.name}</h1>
+      <div className="grid grid-cols-1 gap-4 mb-6 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
+        <div className="min-w-0">
+          <h1 className="truncate text-2xl font-bold sm:text-3xl">{event.name}</h1>
           <p className="text-muted-foreground">Construtor visual de mapa — arraste para reposicionar.</p>
         </div>
-        <Button variant="outline" onClick={exportJson}><Download className="w-4 h-4 mr-2" /> Exportar JSON</Button>
+        <Button className="w-full sm:w-auto" variant="outline" onClick={exportJson}><Download className="w-4 h-4 mr-2" /> Exportar JSON</Button>
       </div>
 
       <div className="grid lg:grid-cols-[1fr_320px] gap-6">
         <div>
           <EventMap eventId={eventId} editable onSelect={(s) => setSelectedId(s.id)} selectedId={selectedId} />
-          <p className="text-xs text-muted-foreground mt-3">💡 Clique numa barraca para editar. Arraste para mover (snap a 20px).</p>
+          <p className="text-xs text-muted-foreground mt-3">Toque numa barraca para editar. Arraste para mover (snap a 20px).</p>
         </div>
 
         <aside className="space-y-5">

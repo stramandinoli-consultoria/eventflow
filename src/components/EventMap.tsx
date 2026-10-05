@@ -2,7 +2,11 @@ import { useNavigate } from "@tanstack/react-router";
 import { useStore, standTypeColor, type Stand } from "@/lib/store";
 import { useShallow } from "zustand/react/shallow";
 import { Beer, UtensilsCrossed, IceCream, Wine, Music, DoorOpen, Crown, Bath, Wallet } from "lucide-react";
-import { useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+
+const MIN_MAP_WIDTH = 800;
+const MIN_MAP_HEIGHT = 520;
+const MAP_MARGIN = 40;
 
 const ICONS = {
   food: UtensilsCrossed, drink: Wine, beer: Beer, dessert: IceCream,
@@ -22,18 +26,43 @@ export function EventMap({ eventId, editable, onSelect, selectedId }: Props) {
   const moveStand = useStore((s) => s.moveStand);
   const navigate = useNavigate();
   const ref = useRef<HTMLDivElement>(null);
+  const [viewportWidth, setViewportWidth] = useState(0);
   const [drag, setDrag] = useState<{ id: string; ox: number; oy: number } | null>(null);
+
+  const mapSize = useMemo(() => ({
+    width: Math.max(MIN_MAP_WIDTH, ...stands.map((stand) => stand.x + stand.width + MAP_MARGIN)),
+    height: Math.max(MIN_MAP_HEIGHT, ...stands.map((stand) => stand.y + stand.height + MAP_MARGIN)),
+  }), [stands]);
+  const scale = viewportWidth > 0 ? Math.min(1, viewportWidth / mapSize.width) : 1;
+
+  useEffect(() => {
+    const element = ref.current;
+    if (!element) return;
+    const updateWidth = () => setViewportWidth(element.clientWidth);
+    updateWidth();
+    const observer = new ResizeObserver(updateWidth);
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, []);
 
   const onDown = (e: React.PointerEvent, s: Stand) => {
     if (!editable) return;
     e.stopPropagation();
     (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
-    setDrag({ id: s.id, ox: e.clientX - s.x, oy: e.clientY - s.y });
+    const bounds = ref.current?.getBoundingClientRect();
+    if (!bounds) return;
+    const pointerX = (e.clientX - bounds.left) / scale;
+    const pointerY = (e.clientY - bounds.top) / scale;
+    setDrag({ id: s.id, ox: pointerX - s.x, oy: pointerY - s.y });
   };
   const onMove = (e: React.PointerEvent) => {
     if (!drag) return;
+    const bounds = ref.current?.getBoundingClientRect();
+    if (!bounds) return;
     const snap = (v: number) => Math.round(v / 20) * 20;
-    moveStand(drag.id, Math.max(0, snap(e.clientX - drag.ox)), Math.max(0, snap(e.clientY - drag.oy)));
+    const pointerX = (e.clientX - bounds.left) / scale;
+    const pointerY = (e.clientY - bounds.top) / scale;
+    moveStand(drag.id, Math.max(0, snap(pointerX - drag.ox)), Math.max(0, snap(pointerY - drag.oy)));
   };
   const onUp = () => setDrag(null);
 
@@ -42,14 +71,22 @@ export function EventMap({ eventId, editable, onSelect, selectedId }: Props) {
       ref={ref}
       onPointerMove={onMove}
       onPointerUp={onUp}
-      className="relative w-full h-[520px] rounded-2xl border border-border overflow-hidden bg-card shadow-elevated"
-      style={{
-        backgroundImage:
-          "linear-gradient(oklch(0.3 0.02 50 / 0.5) 1px, transparent 1px), linear-gradient(90deg, oklch(0.3 0.02 50 / 0.5) 1px, transparent 1px)",
-        backgroundSize: "20px 20px",
-      }}
+      onPointerCancel={onUp}
+      className="relative w-full overflow-hidden rounded-lg border border-border bg-card shadow-elevated touch-none"
+      style={{ height: viewportWidth > 0 ? mapSize.height * scale : mapSize.height }}
     >
-      {stands.map((s) => {
+      <div
+        className="absolute left-0 top-0 origin-top-left"
+        style={{
+          width: mapSize.width,
+          height: mapSize.height,
+          transform: `scale(${scale})`,
+          backgroundImage:
+            "linear-gradient(oklch(0.3 0.02 50 / 0.5) 1px, transparent 1px), linear-gradient(90deg, oklch(0.3 0.02 50 / 0.5) 1px, transparent 1px)",
+          backgroundSize: "20px 20px",
+        }}
+      >
+        {stands.map((s) => {
         const Icon = ICONS[s.category];
         const isSel = selectedId === s.id;
         const color = standTypeColor[s.category];
@@ -83,7 +120,8 @@ export function EventMap({ eventId, editable, onSelect, selectedId }: Props) {
             )}
           </div>
         );
-      })}
+        })}
+      </div>
     </div>
   );
 }
