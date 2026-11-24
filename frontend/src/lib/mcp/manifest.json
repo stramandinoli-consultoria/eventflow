@@ -1,0 +1,359 @@
+{
+  "path": "/mcp",
+  "auth": {
+    "type": "bearer",
+    "description": "JWT da API EventFlow (POST /api/auth/login)"
+  },
+  "mcp": {
+    "server": {
+      "name": "eventflow",
+      "version": "1.0.0",
+      "title": "EventFlow"
+    },
+    "tools": [
+      {
+        "name": "whoami",
+        "title": "Quem sou eu",
+        "description": "Retorna o usuário autenticado no EventFlow (id e e-mail), útil para verificar a conexão MCP.",
+        "annotations": {
+          "title": "Quem sou eu",
+          "idempotentHint": true,
+          "openWorldHint": false,
+          "readOnlyHint": true
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {},
+          "required": []
+        }
+      },
+      {
+        "name": "list_events",
+        "title": "Listar eventos",
+        "description": "Retorna os eventos gastronômicos disponíveis no EventFlow.",
+        "annotations": {
+          "title": "Listar eventos",
+          "idempotentHint": true,
+          "openWorldHint": false,
+          "readOnlyHint": true
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "status": {
+              "description": "Filtra por status do evento: live, upcoming ou ended.",
+              "type": "string",
+              "enum": [
+                "live",
+                "upcoming",
+                "ended"
+              ]
+            }
+          },
+          "required": []
+        }
+      },
+      {
+        "name": "list_orders",
+        "title": "Listar pedidos",
+        "description": "Lista os pedidos do EventFlow com paginação e ordenação por data de criação, filtrando por evento, empresa parceira (barraca) e status. Inclui opcionalmente a timeline de cada pedido.",
+        "annotations": {
+          "title": "Listar pedidos",
+          "idempotentHint": true,
+          "openWorldHint": false,
+          "readOnlyHint": true
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "event_id": {
+              "description": "ID do evento, ex.: ev1.",
+              "type": "string"
+            },
+            "stand_name": {
+              "description": "Nome da empresa parceira / barraca (busca parcial).",
+              "type": "string"
+            },
+            "status": {
+              "description": "Filtra por status do pedido: awaiting_payment, preparing, ready, completed ou cancelled.",
+              "type": "string",
+              "enum": [
+                "awaiting_payment",
+                "preparing",
+                "ready",
+                "completed",
+                "cancelled"
+              ]
+            },
+            "include_timeline": {
+              "description": "Inclui a timeline de cada pedido (padrão: true).",
+              "type": "boolean",
+              "default": true
+            },
+            "limit": {
+              "description": "Pedidos por página, de 1 a 100 (padrão: 25).",
+              "type": "integer",
+              "default": 25
+            },
+            "page": {
+              "description": "Número da página, começando em 1 (padrão: 1).",
+              "type": "integer",
+              "default": 1
+            },
+            "sort": {
+              "description": "Ordenação por data de criação: created_at_desc (padrão) ou created_at_asc.",
+              "type": "string",
+              "default": "created_at_desc",
+              "enum": [
+                "created_at_desc",
+                "created_at_asc"
+              ]
+            }
+          },
+          "required": []
+        }
+      },
+      {
+        "name": "get_order",
+        "title": "Detalhar pedido",
+        "description": "Retorna um pedido do EventFlow com itens, status atual e a timeline completa.",
+        "annotations": {
+          "title": "Detalhar pedido",
+          "idempotentHint": true,
+          "openWorldHint": false,
+          "readOnlyHint": true
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "order_id": {
+              "description": "ID do pedido, ex.: ord-1042.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "order_id"
+          ]
+        }
+      },
+      {
+        "name": "update_order_status",
+        "title": "Atualizar status do pedido",
+        "description": "Atualiza o status de um pedido (ex.: marcar como pronto), registra automaticamente a timeline e dispara os webhooks cadastrados.",
+        "annotations": {
+          "title": "Atualizar status do pedido",
+          "destructiveHint": false,
+          "openWorldHint": true,
+          "readOnlyHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "order_id": {
+              "description": "ID do pedido, ex.: ord-1042.",
+              "type": "string"
+            },
+            "status": {
+              "description": "Novo status: awaiting_payment, preparing, ready, completed ou cancelled.",
+              "type": "string",
+              "enum": [
+                "awaiting_payment",
+                "preparing",
+                "ready",
+                "completed",
+                "cancelled"
+              ]
+            },
+            "note": {
+              "description": "Observação registrada na timeline (até 280 caracteres).",
+              "type": "string"
+            }
+          },
+          "required": [
+            "order_id",
+            "status"
+          ]
+        }
+      },
+      {
+        "name": "bulk_update_order_status",
+        "title": "Atualizar status em lote",
+        "description": "Atualiza o status de vários pedidos de uma vez, registra a timeline de cada um e dispara os webhooks. Retorna o resultado individual de cada pedido.",
+        "annotations": {
+          "title": "Atualizar status em lote",
+          "destructiveHint": false,
+          "openWorldHint": true,
+          "readOnlyHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "order_ids": {
+              "description": "IDs dos pedidos, ex.: [\"ord-1042\", \"ord-1043\"] (até 100).",
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "status": {
+              "description": "Novo status aplicado a todos os pedidos.",
+              "type": "string",
+              "enum": [
+                "awaiting_payment",
+                "preparing",
+                "ready",
+                "completed",
+                "cancelled"
+              ]
+            },
+            "note": {
+              "description": "Observação registrada na timeline de cada pedido.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "order_ids",
+            "status"
+          ]
+        }
+      },
+      {
+        "name": "subscribe_order_updates",
+        "title": "Assinar avisos de pedidos",
+        "description": "Cadastra um webhook que recebe um POST em JSON assinado com HMAC-SHA256 sempre que o status de um pedido mudar, com reenvio automático em caso de falha. Pode filtrar por evento e/ou empresa parceira.",
+        "annotations": {
+          "title": "Assinar avisos de pedidos",
+          "openWorldHint": true,
+          "readOnlyHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "url": {
+              "description": "URL https que receberá o POST de notificação.",
+              "type": "string"
+            },
+            "event_id": {
+              "description": "Notificar apenas pedidos deste evento.",
+              "type": "string"
+            },
+            "stand_name": {
+              "description": "Notificar apenas pedidos desta empresa parceira.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "url"
+          ]
+        }
+      },
+      {
+        "name": "list_order_subscriptions",
+        "title": "Listar avisos cadastrados",
+        "description": "Lista os webhooks de notificação de pedidos cadastrados pelo usuário conectado.",
+        "annotations": {
+          "title": "Listar avisos cadastrados",
+          "idempotentHint": true,
+          "openWorldHint": false,
+          "readOnlyHint": true
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {},
+          "required": []
+        }
+      },
+      {
+        "name": "unsubscribe_order_updates",
+        "title": "Remover aviso de pedidos",
+        "description": "Remove um webhook de notificação de pedidos cadastrado pelo usuário conectado.",
+        "annotations": {
+          "title": "Remover aviso de pedidos",
+          "destructiveHint": true,
+          "openWorldHint": false,
+          "readOnlyHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "webhook_id": {
+              "description": "ID (uuid) do webhook a remover.",
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "required": [
+            "webhook_id"
+          ]
+        }
+      },
+      {
+        "name": "list_webhook_deliveries",
+        "title": "Auditar entregas de webhooks",
+        "description": "Lista as entregas de webhooks do usuário conectado com status, número de tentativas, próximo reenvio e o histórico de cada tentativa.",
+        "annotations": {
+          "title": "Auditar entregas de webhooks",
+          "idempotentHint": true,
+          "openWorldHint": false,
+          "readOnlyHint": true
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "status": {
+              "description": "Filtra por status da entrega: pending, delivered ou failed.",
+              "type": "string",
+              "enum": [
+                "pending",
+                "delivered",
+                "failed"
+              ]
+            },
+            "webhook_id": {
+              "description": "Filtra por webhook (uuid).",
+              "type": "string",
+              "format": "uuid"
+            },
+            "order_id": {
+              "description": "Filtra por pedido.",
+              "type": "string"
+            },
+            "limit": {
+              "description": "Máximo de entregas, de 1 a 100 (padrão: 25).",
+              "type": "integer",
+              "default": 25
+            },
+            "offset": {
+              "description": "Quantas entregas pular (padrão: 0).",
+              "type": "integer",
+              "default": 0
+            }
+          },
+          "required": []
+        }
+      },
+      {
+        "name": "retry_webhook_deliveries",
+        "title": "Reenviar webhooks",
+        "description": "Reenvia agora as entregas pendentes que já passaram do horário de reenvio, ou força o reenvio de uma entrega específica (inclusive falhas definitivas).",
+        "annotations": {
+          "title": "Reenviar webhooks",
+          "destructiveHint": false,
+          "openWorldHint": true,
+          "readOnlyHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "delivery_id": {
+              "description": "Entrega específica (uuid) a reenviar agora.",
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "required": []
+        }
+      }
+    ]
+  }
+}

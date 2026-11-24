@@ -878,25 +878,27 @@ Também crie:
 
 * Sistema pronto para produção.
 
-This project was built with [Lovable](https://lovable.dev).
+---
 
-**Live app**: https://event-bite-pro.lovable.app
+# Como o projeto está organizado
 
-## Build with Lovable
+| Pasta | O que é |
+| --- | --- |
+| `backend/` | API em .NET 10 (Clean Architecture + CQRS) com PostgreSQL, SignalR e servidor MCP |
+| `frontend/` | Site em React + Vite + TanStack Router + Tailwind |
+| `docs/` | Documentação (plano de migração e guia de como rodar) |
 
-Continue developing this project in the [Lovable editor](https://lovable.dev/projects/f9491c11-b8b5-4bc4-950d-9e836f9f017b).
-
-- **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: every change made in Lovable is committed straight to this repository.
-- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
-
-## Development
-
-Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
+Guia completo: [docs/COMO-RODAR.md](docs/COMO-RODAR.md).
 
 ```sh
-git clone <this-repository-url>
-cd <repository-name>
-npm i
-npm run dev
+# 1) API (precisa do PostgreSQL rodando em localhost:5432, usuário/senha postgres)
+cd backend
+dotnet run --project src/EventFlow.Api --launch-profile http
+
+# 2) Front-end (em outro terminal)
+cd frontend
+npm install
+npm run dev        # http://localhost:5174
 ```
+
+Ou tudo com Docker: `docker compose up --build` (front em http://localhost:8081).
