@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\EventFlow.Domain\EventFlow.Domain.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- Abstrações do EF Core (DbSet e consultas assíncronas) usadas pelos casos de uso. -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.15" />
+    <PackageReference Include="FluentValidation" Version="12.2.0" />
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.2.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.15" />
+  </ItemGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="EventFlow.Api.IntegrationTests" />
+  </ItemGroup>
+</Project>

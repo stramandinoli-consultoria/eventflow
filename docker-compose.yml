@@ -1,0 +1,36 @@
+# Sobe PostgreSQL + API .NET + front (nginx) com um comando: docker compose up --build
+# Front: http://localhost:8081  ·  API: http://localhost:5080  ·  Banco: localhost:5433
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: eventflow
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+    ports: ["5433:5432"]
+    volumes: [eventflow-db:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d eventflow"]
+      interval: 5s
+      retries: 10
+
+  api:
+    build: ./backend
+    depends_on:
+      db: { condition: service_healthy }
+    environment:
+      ConnectionStrings__Default: Host=db;Port=5432;Database=eventflow;Username=postgres;Password=${POSTGRES_PASSWORD:-postgres}
+      # Troque por uma chave longa e secreta (pelo menos 32 caracteres) fora do ambiente local.
+      Jwt__Key: ${JWT_KEY:-troque-esta-chave-por-uma-chave-secreta-de-32+}
+      Database__MigrateOnStartup: "true"
+      Database__Seed: "true"
+      Docs__Enabled: "true"
+    ports: ["5080:8080"]
+
+  web:
+    build: ./frontend
+    depends_on: [api]
+    ports: ["8081:80"]
+
+volumes:
+  eventflow-db:

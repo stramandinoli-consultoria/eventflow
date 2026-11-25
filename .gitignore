@@ -5,28 +5,31 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
-lerna-debug.log*
 
+# Front-end
 node_modules
 dist
 dist-ssr
-.output
-.vinxi
 .tanstack/**
-.nitro
 *.local
 
-# Wrangler / Cloudflare
-.wrangler/
-.dev.vars
+# Back-end (.NET)
+bin/
+obj/
+*.user
+TestResults/
 
-# Editor directories and files
+# Segredos e configuração local
+.env
+.env.*
+!.env.example
+appsettings.*.local.json
+
+# Editor
 .vscode/*
 !.vscode/extensions.json
 .idea
+.vs/
 .DS_Store
 *.suo
-*.ntvs*
-*.njsproj
-*.sln
 *.sw?
